@@ -1,0 +1,83 @@
+@import "https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap";
+@import "tailwindcss";
+
+body {
+	font-family: "Poppins", sans-serif;
+}
+
+@theme {
+	--color-primary: #171717;
+	--color-secondary: #f5f5f5;
+	--color-dark: #171717;
+	--color-light: #f5f5f5;
+	--color-accent: #efb100;
+	--color-accent-hover: #d08700;
+
+	--breakpoint-xs: 480px;
+}
+
+/* Change background and text color of selected text */
+::selection {
+	background-color: #d08700;
+	/* Highlight background */
+	color: black;
+	/* Text color */
+}
+
+/* For Firefox specifically (requires ::-moz-selection) */
+::-moz-selection {
+	background-color: #d08700;
+	color: black;
+}
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+	width: 5px;
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+	background-color: oklch(35.618% 0.00004 271.152);
+	border-radius: 4px;
+	transition: background-color 0.3s ease;
+}
+
+/* Scrollbar thumb hover */
+::-webkit-scrollbar-thumb:hover {
+	background-color: oklch(58.632% 0.00007 271.152);
+}
+
+/* Scrollbar corner */
+::-webkit-scrollbar-corner {
+	background-color: #4a4a4a;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+	background-color: oklch(20.904% 0.00002 271.152);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+
+button {
+	cursor: pointer;
+}
