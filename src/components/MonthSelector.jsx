@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { IoIosArrowBack } from "react-icons/io";
 
-const MonthSelector = ({ value, onChange, label }) => {
+const MonthSelector = ({ value, onChange }) => {
 	const currentMonthKey = dayjs().format("YYYY-MM"); // e.g., "2024-06"
 	const minMonthKey = import.meta.env.VITE_MIN_MONTH_KEY || "2025-07"; // default min month if not set in .env
 
