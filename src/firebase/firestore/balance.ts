@@ -1,3 +1,4 @@
+import { ensureSocietyId } from "../../utils/ensureSocietyId";
 import {
 	collection,
 	db,
@@ -15,6 +16,8 @@ export async function updateBalance(
 	type: "credit" | "debit" | "initial",
 	monthKey?: string // 👈 monthly balance bhi
 ) {
+	!societyId && (societyId = await ensureSocietyId(societyId));
+
 	try {
 		const numAmount = Number(amount); // 👈 force number
 		if (isNaN(numAmount)) throw new Error("Invalid amount");
@@ -83,6 +86,8 @@ export async function updateBalance(
 
 // Get all monthly balances
 export async function getAllMonthlyBalances(societyId: string) {
+	!societyId && (societyId = await ensureSocietyId(societyId));
+
 	try {
 		const ref = collection(db, "societies", societyId, "balances");
 		const snap = await getDocs(ref);
@@ -112,6 +117,8 @@ export async function getAllMonthlyBalances(societyId: string) {
 
 // Get monthly balance by monthKey
 export async function getMonthlyBalance(societyId: string, monthKey: string) {
+	!societyId && (societyId = await ensureSocietyId(societyId));
+
 	try {
 		const ref = doc(db, "societies", societyId, "balances", monthKey);
 		const snap = await getDoc(ref);
@@ -133,6 +140,8 @@ export async function getMonthlyBalance(societyId: string, monthKey: string) {
 
 // Get balance
 export async function getBalance(societyId: string) {
+	!societyId && (societyId = await ensureSocietyId(societyId));
+
 	try {
 		const ref = doc(db, "societies", societyId, "settings", "balance");
 		const snap = await getDoc(ref);

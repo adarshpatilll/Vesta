@@ -57,9 +57,7 @@ export const SocietyProvider = ({ children }) => {
 		};
 
 		if (user && societyId) {
-			setTimeout(() => {
-				fetchData();
-			}, 500); // Slight delay to ensure societyId is set
+			fetchData();
 		}
 	}, [user, societyId]);
 
@@ -68,7 +66,7 @@ export const SocietyProvider = ({ children }) => {
 		if (societyId) {
 			autoMarkUnpaidResidents(societyId);
 		}
-	}, [societyId]);
+	}, [user]);
 
 	return (
 		<SocietyContext.Provider

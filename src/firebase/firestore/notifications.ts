@@ -69,7 +69,7 @@ export async function deleteNotification(
 
 // Get notifications
 export async function getNotifications(societyId: string): Promise<any> {
-	societyId = await ensureSocietyId(societyId);
+	!societyId && (societyId = await ensureSocietyId(societyId));
 
 	try {
 		const ref = collection(db, "societies", societyId, "notifications");

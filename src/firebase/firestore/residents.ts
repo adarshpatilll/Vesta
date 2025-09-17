@@ -38,6 +38,8 @@ export const addResident = async (
 		tenantContact?: string;
 	}
 ) => {
+   !societyId && (societyId = await ensureSocietyId(societyId));
+   
 	try {
 		const monthKey = getMonthKey();
 
@@ -64,7 +66,7 @@ export const getResidentById = async (
 	societyId: string,
 	residentId: string
 ) => {
-	societyId = await ensureSocietyId(societyId);
+	!societyId && (societyId = await ensureSocietyId(societyId));
 
 	try {
 		const residentRef = doc(
@@ -83,6 +85,8 @@ export const getResidentById = async (
 
 // Get all residents
 export const getAllResidents = async (societyId: string) => {
+   !societyId && (societyId = await ensureSocietyId(societyId));
+   
 	try {
 		const residentsRef = collection(db, "societies", societyId, "residents");
 		const snapshot = await getDocs(residentsRef);
@@ -134,6 +138,8 @@ export const updateResident = async (
 		tenantContact?: string;
 	}
 ) => {
+   !societyId && (societyId = await ensureSocietyId(societyId));
+   
 	try {
 		const residentRef = doc(
 			db,
@@ -154,6 +160,7 @@ export const updateResident = async (
 // Delete resident
 export const deleteResident = async (societyId: string, residentId: string) => {
 	!societyId && (societyId = await ensureSocietyId(societyId));
+   
 	try {
 		const residentRef = doc(
 			db,
