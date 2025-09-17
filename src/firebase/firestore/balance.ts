@@ -14,21 +14,24 @@ export async function updateBalance(
 	societyId: string,
 	amount: number | string,
 	type: "credit" | "debit" | "initial",
-	monthKey?: string // 👈 monthly balance bhi
+	monthKey?: string,
+	isUndo: boolean = false // 👈 new param
 ) {
 	!societyId && (societyId = await ensureSocietyId(societyId));
 
 	try {
-		const numAmount = Number(amount); // 👈 force number
+		const numAmount = Number(amount);
 		if (isNaN(numAmount)) throw new Error("Invalid amount");
 
-		// total balance ref
 		const totalRef = doc(db, "societies", societyId, "settings", "balance");
 		const totalSnap = await getDoc(totalRef);
 
-		// calculate delta
-		const delta =
-			type !== "initial" ? (type === "credit" ? numAmount : -numAmount) : 0;
+		// delta calculation
+		let delta = 0;
+		if (type !== "initial") {
+			if (type === "credit") delta = isUndo ? -numAmount : numAmount;
+			if (type === "debit") delta = isUndo ? numAmount : -numAmount;
+		}
 
 		// ---- Update Global Total ----
 		if (totalSnap.exists()) {
@@ -43,38 +46,32 @@ export async function updateBalance(
 		const monthRef = doc(db, "societies", societyId, "balances", mk);
 		const monthSnap = await getDoc(monthRef);
 
-		// if monthSnap exists, update credit/debit/balance
 		if (monthSnap.exists()) {
 			const data = monthSnap.data();
 			await updateDoc(monthRef, {
 				credit:
-					Number(data.credit || 0) + (type === "credit" ? numAmount : 0),
-				debit: Number(data.debit || 0) + (type === "debit" ? numAmount : 0),
+					Number(data.credit || 0) +
+					(type === "credit" ? (isUndo ? -numAmount : numAmount) : 0),
+				debit:
+					Number(data.debit || 0) +
+					(type === "debit" ? (isUndo ? -numAmount : numAmount) : 0),
 				balance: Number(data.balance || 0) + delta,
 			});
 		} else {
-			// first time create
+			// First time create
 			const prevMonthKey = dayjs(mk, "YYYY-MM")
 				.subtract(1, "month")
 				.format("YYYY-MM");
 
-			// get prev month balance to set carryForward
 			const prevMonthData = await getMonthlyBalance(societyId, prevMonthKey);
 			const carryForward = Number(prevMonthData?.balance || 0);
 
-			// calculate new balance
-			const delta =
-				type === "credit"
-					? carryForward + numAmount
-					: type === "debit"
-					? carryForward - numAmount
-					: carryForward;
+			const newBalance = carryForward + delta;
 
-			// create new month record
 			await setDoc(monthRef, {
-				credit: type === "credit" ? numAmount : 0,
-				debit: type === "debit" ? numAmount : 0,
-				balance: delta,
+				credit: type === "credit" ? (isUndo ? 0 : numAmount) : 0,
+				debit: type === "debit" ? (isUndo ? 0 : numAmount) : 0,
+				balance: newBalance,
 				carryForward: carryForward,
 			});
 		}

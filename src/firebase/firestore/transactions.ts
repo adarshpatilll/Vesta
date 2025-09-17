@@ -3,6 +3,7 @@ import {
 	addDoc,
 	collection,
 	db,
+	deleteDoc,
 	doc,
 	getDoc,
 	getDocs,
@@ -20,6 +21,7 @@ export const addTransaction = async (
 		amount: number;
 		description: string;
 		monthKey: string; // YYYY-MM
+		isMonthlyMaintenance?: boolean; // to identify if this is a monthly maintenance payment
 	}
 ) => {
 	societyId = await ensureSocietyId(societyId);
@@ -55,6 +57,7 @@ export const addTransaction = async (
 			isMultipleResidents: data.residentId.length > 1,
 			createdAt: Timestamp.now(),
 			updatedAt: null,
+			isMonthlyMaintenance: data.isMonthlyMaintenance || false,
 			date: Timestamp.now(),
 		});
 
@@ -66,6 +69,83 @@ export const addTransaction = async (
 		throw error;
 	}
 };
+
+// Remove transaction by monthKey and transactionId
+export const removeTransaction = async (
+	societyId: string,
+	monthKey: string,
+	transactionId: string,
+	originalTxn: {
+		amount: number;
+		type: "credit" | "debit"; // 👈 original type
+	}
+) => {
+	!societyId && (societyId = await ensureSocietyId());
+
+	try {
+		const docRef = doc(
+			db,
+			"societies",
+			societyId,
+			"transactions",
+			monthKey,
+			"items",
+			transactionId
+		);
+
+		await deleteDoc(docRef);
+
+		// ✅ Reverse effect properly
+		await updateBalance(
+			societyId,
+			originalTxn.amount,
+			originalTxn.type,
+			monthKey,
+			true // 👈 undo mode
+		);
+
+		return true;
+	} catch (error: any) {
+		throw error;
+	}
+};
+
+interface ITransaction {
+	id: string;
+	residentId: Array<string>;
+	type: "credit" | "debit";
+	amount: number;
+	description: string;
+	monthKey: string; // YYYY-MM
+	isMonthlyMaintenance?: boolean; // to identify if this is a monthly maintenance payment
+	isMultipleResidents: boolean;
+	createdAt: Timestamp;
+	updatedAt: Timestamp | null;
+	date: Timestamp;
+}
+
+// Get all transactions by month
+export async function getTransactions(
+	societyId: string,
+	monthKey: string
+): Promise<ITransaction[]> {
+	try {
+		const ref = collection(
+			db,
+			"societies",
+			societyId,
+			"transactions",
+			monthKey,
+			"items"
+		);
+		const snap = await getDocs(ref);
+		return snap.docs.map(
+			(doc) => ({ id: doc.id, ...doc.data() } as ITransaction)
+		);
+	} catch (error: any) {
+		throw error;
+	}
+}
 
 // Get All transactions across all months {societyId}
 export async function getAllTransactions(societyId: string): Promise<any[]> {
@@ -99,27 +179,6 @@ export async function getAllTransactions(societyId: string): Promise<any[]> {
 		allTx.sort((a, b) => (a.monthKey < b.monthKey ? 1 : -1));
 
 		return allTx; // return all transactions across all months ex: [{id, monthKey, ...data}, ...]
-	} catch (error: any) {
-		throw error;
-	}
-}
-
-// Get all transactions by month
-export async function getTransactions(
-	societyId: string,
-	monthKey: string
-): Promise<any> {
-	try {
-		const ref = collection(
-			db,
-			"societies",
-			societyId,
-			"transactions",
-			monthKey,
-			"items"
-		);
-		const snap = await getDocs(ref);
-		return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 	} catch (error: any) {
 		throw error;
 	}

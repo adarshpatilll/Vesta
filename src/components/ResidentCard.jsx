@@ -2,10 +2,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useSociety } from "../context/SocietyContext";
 import { markMaintenancePaid } from "../firebase/firestore/paymentCycle";
-import { WalletMinimal, Pencil } from "lucide-react";
+import { WalletMinimal, Pencil, Undo2 } from "lucide-react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import MaintenanceHistoryModal from "./MaintenanceHistoryModal";
 import { useState } from "react";
+import getMonthKey from "../utils/getMonthKey";
 
 const ResidentCard = ({
 	filteredResidents,
@@ -15,32 +16,73 @@ const ResidentCard = ({
 	onDelete,
 }) => {
 	const { societyId, setResidents } = useSociety();
+	const currentMonthKey = getMonthKey();
 
 	const handleMarkPaid = async (resident) => {
 		try {
-			toast.promise(markMaintenancePaid(societyId, resident.id, monthKey), {
-				loading: `Marking maintenance as paid for Flat ${resident.flatNo}...`,
-				success: () => {
-					setResidents((prev) =>
-						prev.map((r) =>
-							r.id === resident.id
-								? {
-										...r,
-										maintenance: {
-											...r.maintenance,
-											[monthKey]: "paid",
-										},
-								  }
-								: r
-						)
-					);
-					return `Maintenance marked as paid for Flat ${resident.flatNo}`;
-				},
-				error: `Failed to mark maintenance as paid for Flat ${resident.flatNo}`,
-			});
+			toast.promise(
+				markMaintenancePaid(societyId, resident.id, "paid", monthKey),
+				{
+					loading: `Marking maintenance as paid for Flat ${resident.flatNo}...`,
+					success: () => {
+						setResidents((prev) =>
+							prev.map((r) =>
+								r.id === resident.id
+									? {
+											...r,
+											maintenance: {
+												...r.maintenance,
+												[monthKey]: "paid",
+											},
+									  }
+									: r
+							)
+						);
+						return `Maintenance marked as paid for Flat ${resident.flatNo}`;
+					},
+					error: `Failed to mark maintenance as paid for Flat ${resident.flatNo}`,
+				}
+			);
 		} catch (err) {
 			console.error(err);
 			toast.error("Failed to mark maintenance as paid");
+		}
+	};
+
+	const handleUndoMarkPaid = async (resident) => {
+		// only allow undo if it's the current month
+		if (monthKey !== currentMonthKey) {
+			toast.error("Undo Payment is only allowed for the current month");
+			return;
+		}
+
+		try {
+			toast.promise(
+				markMaintenancePaid(societyId, resident.id, "undo", monthKey),
+				{
+					loading: `Undoing payment for Flat ${resident.flatNo}...`,
+					success: () => {
+						setResidents((prev) =>
+							prev.map((r) =>
+								r.id === resident.id
+									? {
+											...r,
+											maintenance: {
+												...r.maintenance,
+												[monthKey]: "unpaid",
+											},
+									  }
+									: r
+							)
+						);
+						return `Payment undone for Flat ${resident.flatNo}`;
+					},
+					error: `Failed to undo payment for Flat ${resident.flatNo}`,
+				}
+			);
+		} catch (err) {
+			console.error(err);
+			toast.error("Failed to undo payment");
 		}
 	};
 
@@ -62,7 +104,7 @@ const ResidentCard = ({
 					{filteredResidents
 						.sort((a, b) => a.flatNo - b.flatNo)
 						.map((res) => {
-							const isPaid = res.maintenance?.[monthKey] === "paid";
+							const isPaid = res.maintenance?.[monthKey] === "paid"; // paid or unpaid
 
 							return (
 								<motion.div
@@ -121,20 +163,31 @@ const ResidentCard = ({
 
 									{/* Mark Maintenance Button */}
 									{showMarkMaintenance && (
-										<button
-											disabled={isPaid}
-											onClick={() => handleMarkPaid(res)}
-											className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition ${
-												isPaid
-													? "bg-green-600/80 text-light cursor-not-allowed"
-													: "bg-red-600/80 text-light hover:bg-red-600"
-											}`}
-										>
-											<span className="flex items-center gap-1 truncate">
-												<WalletMinimal size={14} />
-												{isPaid ? "Paid" : "Mark Maintenance"}
-											</span>
-										</button>
+										<>
+											<button
+												hidden={isPaid}
+												onClick={() => handleMarkPaid(res)}
+												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-red-700/80 text-light hover:bg-red-700`}
+											>
+												<span className="flex items-center gap-1 truncate">
+													<WalletMinimal size={14} />
+													Mark Maintenance
+												</span>
+											</button>
+
+											<button
+												hidden={
+													!isPaid || monthKey !== currentMonthKey
+												}
+												onClick={() => handleUndoMarkPaid(res)}
+												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-blue-700/80 text-light hover:bg-blue-700`}
+											>
+												<span className="flex items-center gap-1 truncate">
+													<Undo2 size={14} />
+													Undo Payment
+												</span>
+											</button>
+										</>
 									)}
 
 									{/* Edit/Delete Buttons */}

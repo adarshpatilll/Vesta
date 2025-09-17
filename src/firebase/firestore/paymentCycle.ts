@@ -11,9 +11,14 @@ import {
 import getMonthKey from "./../../utils/getMonthKey";
 import { addUnpaidNotification } from "./notifications";
 import { ensureSocietyId } from "../../utils/ensureSocietyId";
-import { addTransaction } from "./transactions";
+import {
+	addTransaction,
+	getTransactions,
+	removeTransaction,
+} from "./transactions";
 import { getMaintenanceAmount } from "./maintenanceAmount";
 import { getResidentById } from "./residents";
+import { deleteField } from "firebase/firestore";
 
 // Set payment cycle, e.g., 1-10
 export async function setPaymentCycle(
@@ -48,6 +53,7 @@ export async function getPaymentCycle(societyId: string): Promise<any> {
 export async function markMaintenancePaid(
 	societyId: string,
 	residentId: string,
+	action: "paid" | "undo",
 	monthKey?: string
 ) {
 	!societyId && (societyId = await ensureSocietyId(societyId));
@@ -57,7 +63,6 @@ export async function markMaintenancePaid(
 			monthKey = getMonthKey();
 		}
 
-		// 1. Update resident's maintenance status
 		const residentRef = doc(
 			db,
 			"societies",
@@ -67,29 +72,49 @@ export async function markMaintenancePaid(
 		);
 
 		await updateDoc(residentRef, {
-			[`maintenance.${monthKey}`]: "paid",
+			[`maintenance.${monthKey}`]:
+				action === "paid" ? "paid" : deleteField(),
 			updatedAt: new Date(),
 		});
 
-		// 2. Add a credit transaction
-		// Get maintenence amount from society settings
-		const amount = await getMaintenanceAmount(societyId);
+		if (action === "paid") {
+			// ✅ Add maintenance transaction
+			const amount = await getMaintenanceAmount(societyId);
+			if (!amount) throw new Error("Maintenance amount not set");
 
-		if (!amount) throw new Error("Maintenance amount not set");
+			const flatNumber = await getResidentById(societyId, residentId).then(
+				(resident) => resident?.flatNo || "Unknown"
+			);
 
-		const flatNumber = await getResidentById(societyId, residentId).then(
-			(resident) => resident?.flatNo || "Unknown"
-		);
+			await addTransaction(societyId, {
+				residentId,
+				type: "credit",
+				amount,
+				monthKey,
+				isMonthlyMaintenance: true,
+				description: `Flat No. ${flatNumber} paid maintenance for ${monthKey}`,
+			});
 
-		await addTransaction(societyId, {
-			residentId,
-			type: "credit",
-			amount,
-			monthKey,
-			description: `Flat No. ${flatNumber} was paid maintenance for ${monthKey}`,
-		});
+			return true;
+		} else if (action === "undo") {
+			// ✅ Find transaction to undo
+			const txns = await getTransactions(societyId, monthKey);
 
-		return true;
+			const txnToDelete = txns.find(
+				(txn) =>
+					txn.isMonthlyMaintenance &&
+					txn.type === "credit" &&
+					txn.residentId.includes(residentId)
+			);
+
+			if (txnToDelete) {
+				// ✅ Reverse balance change of the original credit
+				await removeTransaction(societyId, monthKey, txnToDelete.id, {
+					amount: txnToDelete.amount,
+					type: "credit", // 👈 same as original to reverse correctly
+				});
+			}
+		}
 	} catch (error) {
 		console.error("Error marking maintenance paid:", error);
 		throw error;

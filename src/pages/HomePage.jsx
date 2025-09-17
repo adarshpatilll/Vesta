@@ -6,13 +6,14 @@ import { getMonthlyBalance } from "../firebase/firestore/balance"; // 👈 new f
 import { getTransactions } from "../firebase/firestore/transactions";
 import SkeletonTransaction from "../components/SkeletonTransaction";
 import dayjs from "dayjs";
-import CircularLoader from "../components/CircularLoader";
+import TransactionList from "../components/TransactionList";
 
 const HomePage = () => {
 	const { societyId } = useAuth();
 	const [monthKey, setMonthKey] = useState(dayjs().format("YYYY-MM"));
 	const [transactions, setTransactions] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [balanceLoading, setBalanceLoading] = useState(false);
 	const [selectedTab, setSelectedTab] = useState("credit");
 	const [monthlyData, setMonthlyData] = useState({
 		balance: 0,
@@ -24,11 +25,14 @@ const HomePage = () => {
 	// Fetch monthly balance
 	useEffect(() => {
 		const fetchBalance = async () => {
+			setBalanceLoading(true);
 			try {
 				const data = await getMonthlyBalance(societyId, monthKey);
 				setMonthlyData(data);
 			} catch (err) {
 				console.error(err);
+			} finally {
+				setTimeout(() => setBalanceLoading(false), 300); // slight delay for better UX
 			}
 		};
 		fetchBalance();
@@ -44,9 +48,10 @@ const HomePage = () => {
 			} catch (err) {
 				console.error(err);
 			} finally {
-				setLoading(false);
+				setTimeout(() => setLoading(false), 300); // slight delay for better UX
 			}
 		};
+
 		fetchTx();
 	}, [societyId, monthKey]);
 
@@ -67,33 +72,54 @@ const HomePage = () => {
 				className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
 			>
 				{/* Monthly Balance */}
+
 				<div className="rounded-xl bg-neutral-800 border border-neutral-700 p-4 md:p-6 shadow-lg flex flex-col items-center justify-center">
-					<p className="text-sm text-neutral-400">
-						Balance ({dayjs(monthKey).format("MMM YYYY")})
-					</p>
+					<div className="text-sm text-neutral-400">
+						{balanceLoading ? (
+							<Skeleton className="h-5 w-36 mb-1" />
+						) : (
+							`Balance (${dayjs(monthKey).format("MMM YYYY")})`
+						)}
+					</div>
 					<h2 className="text-2xl font-bold text-yellow-400">
-						₹{monthlyData.balance}
+						{balanceLoading ? (
+							<Skeleton className="h-6 w-24 mb-1" />
+						) : (
+							`₹${monthlyData.balance}`
+						)}
 					</h2>
-					<p className="text-xs text-neutral-500">
-						Carry Forward: ₹{monthlyData.carryForward}
-					</p>
+					<div className="text-xs text-neutral-500">
+						{balanceLoading ? (
+							<Skeleton className="h-4 w-32" />
+						) : (
+							`Carry Forward: ₹${monthlyData.carryForward}`
+						)}
+					</div>
 				</div>
 
 				{/* Monthly Credit + Debit */}
 				<div className="grid grid-cols-2 gap-4">
 					{/* Monthly Credit */}
 					<div className="w-full rounded-xl bg-neutral-800 border border-neutral-700 p-4 md:p-6 shadow-lg flex flex-col items-center justify-center">
-						<p className="text-sm text-neutral-400">Total Credits</p>
+						<div className="text-sm text-neutral-400">Total Credits</div>
 						<h2 className="text-xl font-bold text-green-400">
-							₹{monthlyData.credit}
+							{balanceLoading ? (
+								<Skeleton className="h-6 w-24 mt-1" />
+							) : (
+								`₹${monthlyData.credit}`
+							)}
 						</h2>
 					</div>
 
 					{/* Monthly Debit */}
 					<div className="w-full rounded-xl bg-neutral-800 border border-neutral-700 p-4 md:p-6 shadow-lg flex flex-col items-center justify-center">
-						<p className="text-sm text-neutral-400">Total Debits</p>
+						<div className="text-sm text-neutral-400">Total Debits</div>
 						<h2 className="text-xl font-bold text-red-400">
-							₹{monthlyData.debit}
+							{balanceLoading ? (
+								<Skeleton className="h-6 w-24 mt-1" />
+							) : (
+								`₹${monthlyData.debit}`
+							)}
 						</h2>
 					</div>
 				</div>
@@ -127,7 +153,7 @@ const HomePage = () => {
 
 				{/* Transactions List */}
 				{loading ? (
-					<div className="overflow-y-auto hide-scrollbar p-6 max-h-[42svh]">
+					<div className="overflow-y-auto hide-scrollbar p-4 max-h-[42svh]">
 						<ul className="space-y-3">
 							{[...Array(2)].map((_, i) => (
 								<SkeletonTransaction key={i} />
@@ -135,60 +161,10 @@ const HomePage = () => {
 						</ul>
 					</div>
 				) : (
-					<div className="overflow-y-auto hide-scrollbar p-4 max-h-[42svh]">
-						{filteredTx.length > 0 ? (
-							<motion.ul
-								initial="hidden"
-								animate="visible"
-								variants={{
-									hidden: { opacity: 0 },
-									visible: {
-										opacity: 1,
-										transition: { staggerChildren: 0.1 },
-									},
-								}}
-								className="space-y-3"
-							>
-								{filteredTx.map((tx) => (
-									<motion.li
-										key={tx.id}
-										variants={{
-											hidden: { opacity: 0, y: 10 },
-											visible: { opacity: 1, y: 0 },
-										}}
-										transition={{ duration: 0.3 }}
-										className="flex items-center justify-between rounded-lg bg-neutral-800 border border-neutral-700 p-3"
-									>
-										<div className="space-y-1">
-											<p className="font-medium text-sm text-light">
-												{tx.description}
-											</p>
-											<p className="text-xs text-neutral-400">
-												{tx.date
-													? dayjs(
-															tx.date?.toDate?.() || tx.date
-													  ).format("DD MMM, YYYY")
-													: tx.monthKey}
-											</p>
-										</div>
-										<span
-											className={`font-semibold ${
-												tx.type === "credit"
-													? "text-green-400"
-													: "text-red-400"
-											}`}
-										>
-											₹{Number(tx.amount).toLocaleString()}
-										</span>
-									</motion.li>
-								))}
-							</motion.ul>
-						) : (
-							<p className="text-center text-sm text-neutral-500">
-								No {selectedTab} transactions this month.
-							</p>
-						)}
-					</div>
+					<TransactionList
+						filteredTx={filteredTx}
+						selectedTab={selectedTab}
+					/>
 				)}
 			</div>
 		</section>
@@ -196,3 +172,9 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+const Skeleton = ({ className = "" }) => {
+	return (
+		<div className={`animate-pulse bg-neutral-700 rounded ${className}`} />
+	);
+};
