@@ -25,6 +25,8 @@ import AddTransactionsPage from "../pages/ManageSociety/AddTransactionsPage";
 import AddResidentPage from "../pages/ManageSociety/ManageResidents/AddResidentPage";
 import UpdateResidentsPage from "../pages/ManageSociety/ManageResidents/UpdateResidentsPage";
 import ViewResidentsPage from "../pages/ManageSociety/ManageResidents/ViewResidentsPage";
+import TermsPage from "./../pages/TermsPage";
+import PrivacyPage from "./../pages/PrivacyPage";
 
 const PublicRoutesArray = [
 	{
@@ -96,6 +98,16 @@ const router = createBrowserRouter([
 	{
 		path: "/new-password", // universal route (no auth wrapper)
 		element: <NewPassword />,
+	},
+
+	{
+		path: "/terms",
+		element: <TermsPage />,
+	},
+
+	{
+		path: "/privacy",
+		element: <PrivacyPage />,
 	},
 
 	// Protected Routes

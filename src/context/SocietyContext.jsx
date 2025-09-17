@@ -57,7 +57,9 @@ export const SocietyProvider = ({ children }) => {
 		};
 
 		if (user && societyId) {
-			fetchData();
+			setTimeout(() => {
+				fetchData();
+			}, 500); // Slight delay to ensure societyId is set
 		}
 	}, [user, societyId]);
 

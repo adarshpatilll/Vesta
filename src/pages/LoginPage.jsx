@@ -227,6 +227,33 @@ const LoginPage = () => {
 						Sign up
 					</Link>
 				</motion.div>
+
+				{/* terms and privacy links */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.4 }}
+					className="flex flex-col items-center gap-1 justify-center border-t border-neutral-700 bg-dark/50 px-6 py-3"
+				>
+					<div className="flex items-center gap-2">
+						<Link
+							to="/terms"
+							className="text-light/50 hover:text-accent text-xs"
+						>
+							Terms of Service
+						</Link>{" "}
+						<span className="text-light/50 text-xs">|</span>{" "}
+						<Link
+							to="/privacy"
+							className="text-light/50 hover:text-accent text-xs"
+						>
+							Privacy Policy
+						</Link>
+					</div>
+					<motion.div className="text-center text-xs text-neutral-500">
+						&copy; {new Date().getFullYear()} Vesta. All rights reserved.
+					</motion.div>
+				</motion.div>
 			</motion.div>
 		</div>
 	);
