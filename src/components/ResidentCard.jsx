@@ -180,7 +180,7 @@ const ResidentCard = ({
 													!isPaid || monthKey !== currentMonthKey
 												}
 												onClick={() => handleUndoMarkPaid(res)}
-												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-blue-700/80 text-light hover:bg-blue-700`}
+												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-green-700/80 text-light hover:bg-green-700`}
 											>
 												<span className="flex items-center gap-1 truncate">
 													<Undo2 size={14} />

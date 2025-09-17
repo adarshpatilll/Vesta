@@ -49,6 +49,8 @@ export const SocietyProvider = ({ children }) => {
 				setBalance(balanceData);
 				setMaintenanceAmount(maintenanceAmountData);
 				setPaymentCycle(paymentCycleData);
+
+				autoMarkUnpaidResidents(societyId);
 			} catch (error) {
 				console.error("Error fetching data at Society Context:", error);
 			} finally {
@@ -60,13 +62,6 @@ export const SocietyProvider = ({ children }) => {
 			fetchData();
 		}
 	}, [user, societyId]);
-
-	// When app loads, auto mark unpaid residents if payment cycle has ended
-	useEffect(() => {
-		if (societyId) {
-			autoMarkUnpaidResidents(societyId);
-		}
-	}, [user]);
 
 	return (
 		<SocietyContext.Provider

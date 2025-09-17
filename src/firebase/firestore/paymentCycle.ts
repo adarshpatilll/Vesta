@@ -9,7 +9,7 @@ import {
 	updateDoc,
 } from "../firebaseServices";
 import getMonthKey from "./../../utils/getMonthKey";
-import { addUnpaidNotification } from "./notifications";
+import { addUnpaidNotification, deleteNotification } from "./notifications";
 import { ensureSocietyId } from "../../utils/ensureSocietyId";
 import {
 	addTransaction,
@@ -95,6 +95,9 @@ export async function markMaintenancePaid(
 				description: `Flat No. ${flatNumber} paid maintenance for ${monthKey}`,
 			});
 
+			// ✅ Remove any unpaid notification for this resident for this month
+			await deleteNotification(societyId, `${residentId}-${monthKey}`);
+
 			return true;
 		} else if (action === "undo") {
 			// ✅ Find transaction to undo
@@ -114,6 +117,9 @@ export async function markMaintenancePaid(
 					type: "credit", // 👈 same as original to reverse correctly
 				});
 			}
+
+			// Recreate unpaid notification
+			await addUnpaidNotification(societyId, residentId, monthKey);
 		}
 	} catch (error) {
 		console.error("Error marking maintenance paid:", error);

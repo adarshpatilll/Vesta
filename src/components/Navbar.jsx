@@ -1,10 +1,12 @@
 import { Link, NavLink } from "react-router-dom";
-import { RiLogoutCircleRLine } from "react-icons/ri";
+import { RiLogoutCircleRLine, RiNotification3Line } from "react-icons/ri";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useSociety } from "../context/SocietyContext";
+import NotificationButton from "./NotificationButton";
+import NotificationsModal from "./NotificationsModal";
 
 const links = [
 	{ to: "/", label: "Home" },
@@ -20,9 +22,11 @@ const Navbar = () => {
 		setBalance,
 		setMaintenanceAmount,
 		setPaymentCycle,
+		notifications,
 	} = useSociety();
 
 	const [userDetails, setUserDetails] = useState(null);
+	const [notificationModalOpen, setNotificationModalOpen] = useState(false);
 
 	useEffect(() => {
 		const fetchUserDetails = async () => {
@@ -110,16 +114,38 @@ const Navbar = () => {
 				))}
 			</motion.div>
 
-			{/* Logout Button */}
-			<motion.button
-				onClick={handleLogout}
-				whileTap={{ scale: 0.9 }}
-				whileHover={{ scale: 1.06 }}
-				transition={{ type: "spring", stiffness: 300 }}
-				className="text-dark rounded-full bg-yellow-500 px-2 py-2 transition-colors duration-200 hover:bg-yellow-600"
+			{/* Logout Button and Notifications */}
+			<motion.div
+				className="flex items-center gap-3"
+				initial={{ opacity: 0, x: 20 }}
+				animate={{ opacity: 1, x: 0 }}
+				transition={{ duration: 0.5, ease: "easeOut" }}
 			>
-				<RiLogoutCircleRLine size={20} />
-			</motion.button>
+				{/* Notifications */}
+				<NotificationButton
+					count={notifications.length}
+					onClick={() => setNotificationModalOpen(true)}
+				/>
+
+				{/* Logout Button */}
+				<motion.button
+					onClick={handleLogout}
+					whileTap={{ scale: 0.9 }}
+					whileHover={{ scale: 1.06 }}
+					transition={{ type: "spring", stiffness: 300 }}
+					className="text-dark rounded-full bg-yellow-500 px-2 py-2 transition-colors duration-200 hover:bg-yellow-600"
+				>
+					<RiLogoutCircleRLine size={20} />
+				</motion.button>
+			</motion.div>
+
+			{/* Notifications Modal */}
+			{notificationModalOpen && (
+				<NotificationsModal
+					open={notificationModalOpen}
+					onClose={() => setNotificationModalOpen(false)}
+				/>
+			)}
 		</motion.nav>
 	);
 };
