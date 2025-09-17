@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
 				setSocietyId(societyId);
 			} else {
 				setUser(null);
+				setSocietyId(null);
 				setIsAuthenticated(false);
 			}
 			setLoading(false);
@@ -38,14 +39,20 @@ export const AuthProvider = ({ children }) => {
 		<AuthContext.Provider
 			value={{
 				user,
+				setUser,
+
 				societyId,
+				setSocietyId,
+
 				loading,
 				isAuthenticated,
-				findSocietyIdByUid,
+
 				loginAdmin,
-				getAdminDetails,
 				logoutAdmin,
 				registerAdmin,
+				getAdminDetails,
+
+				findSocietyIdByUid,
 			}}
 		>
 			{children}

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useSociety } from "../context/SocietyContext";
 
 const links = [
 	{ to: "/", label: "Home" },
@@ -12,7 +13,14 @@ const links = [
 ];
 
 const Navbar = () => {
-	const { logoutAdmin, getAdminDetails } = useAuth();
+	const { logoutAdmin, getAdminDetails, setUser, setSocietyId } = useAuth();
+	const {
+		setResidents,
+		setNotifications,
+		setBalance,
+		setMaintenanceAmount,
+		setPaymentCycle,
+	} = useSociety();
 
 	const [userDetails, setUserDetails] = useState(null);
 
@@ -25,9 +33,17 @@ const Navbar = () => {
 		fetchUserDetails();
 	}, [getAdminDetails]);
 
+	// Set initial context state on logout to avoid stale data issues after logout and login with different user
 	const handleLogout = async () => {
 		try {
 			await logoutAdmin();
+			setUser(null);
+			setSocietyId(null);
+			setResidents([]);
+			setNotifications([]);
+			setBalance(null);
+			setMaintenanceAmount(null);
+			setPaymentCycle(null);
 			toast.success(`Goodbye, ${userDetails?.name || "Investor"}!`, {
 				duration: 3000,
 			});
@@ -53,7 +69,9 @@ const Navbar = () => {
 					to={"/"}
 					className="flex items-center justify-center text-xl font-bold tracking-wider"
 				>
-					<span className="bg-gradient-to-l from-yellow-400 to-light bg-clip-text text-transparent">Vesta</span>
+					<span className="bg-gradient-to-l from-yellow-400 to-light bg-clip-text text-transparent">
+						Vesta
+					</span>
 				</Link>
 			</motion.div>
 
