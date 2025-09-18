@@ -17,6 +17,18 @@ body {
 	--breakpoint-xs: 480px;
 }
 
+.tx-scroll {
+	max-height: 37vh; /* fallback for browsers without dvh */
+	max-height: 37dvh; /* preferred when supported */
+}
+
+@media screen and (min-width: 768px) {
+	.tx-scroll {
+		max-height: 50vh; /* fallback for browsers without dvh */
+		max-height: 50dvh; /* preferred when supported */
+	}
+}
+
 /* Change background and text color of selected text */
 ::selection {
 	background-color: #d08700;

@@ -20,11 +20,10 @@ export default function TransactionList({ filteredTx, selectedTab }) {
 	}, [filteredTx]);
 
 	return (
-		<div className="relative">
+		<div className="relative p-4">
 			<div
 				ref={scrollRef}
-				className="overflow-y-auto hide-scrollbar p-4 relative"
-				style={{ maxHeight: "42vh", maxHeight: "42dvh" }}
+				className="overflow-y-auto hide-scrollbar relative tx-scroll"
 			>
 				{filteredTx.length > 0 ? (
 					<motion.ul

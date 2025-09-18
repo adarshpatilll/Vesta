@@ -2,9 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
-import { SocietyProvider } from "./context/SocietyContext.jsx";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import AppProvider from "./provider/AppProvider.jsx";
 
 // Register service worker
 if (import.meta.env.DEV && "serviceWorker" in navigator) {
@@ -18,14 +16,8 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
-		<AuthProvider>
-			<SocietyProvider>
-				<GoogleOAuthProvider
-					clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-				>
-					<App />
-				</GoogleOAuthProvider>
-			</SocietyProvider>
-		</AuthProvider>
+		<AppProvider>
+			<App />
+		</AppProvider>
 	</StrictMode>
 );

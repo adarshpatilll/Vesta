@@ -104,18 +104,18 @@ const ExportDataPage = ({ onClose, exportType }) => {
 			getGoogleSheetToken()
 				.then((t) => {
 					if (t) setToken(t);
-					setFetchLoading(false);
+					setTimeout(() => setFetchLoading(false), 500); // slight delay for better UX
 				})
 				.catch((err) => {
 					console.error("Error fetching Google Sheet token:", err);
-					setFetchLoading(false);
+					setTimeout(() => setFetchLoading(false), 500); // slight delay for better UX
 				});
 		}
 	}, [exportType]);
 
 	// 🔹 Top-level Google Login hook
 	const googleLogin = useGoogleLogin({
-		scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file", // Full access to Google Sheets and Drive
+		scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file", // Full access to Google Sheets and Drive.file
 		onSuccess: (tokenResponse) => {
 			updateGoogleSheetToken(tokenResponse.access_token);
 			setToken(tokenResponse.access_token);
@@ -123,9 +123,20 @@ const ExportDataPage = ({ onClose, exportType }) => {
 		},
 		onError: (error) => {
 			console.error("❌ Login Failed:", error);
-			if (error.error === "popup_closed_by_user")
-				toast.error("Google login cancelled");
-			else toast.error("Google login failed");
+			toast.error("Google login failed");
+			setLoading(false);
+		},
+		error_callback: (error) => {
+			console.error("❌ Login Error Callback:", error.message);
+
+			if (error.type === "popup_closed") {
+				toast.error(error.message || "Google login cancelled");
+			} else if (error.type === "popup_failed_to_open") {
+				toast.error(error.message || "Failed to open Google login popup");
+			} else {
+				toast.error("Google login failed");
+			}
+
 			setLoading(false);
 		},
 	});
@@ -286,7 +297,7 @@ const ExportDataPage = ({ onClose, exportType }) => {
 						) : !token && loading ? (
 							"Signing in..."
 						) : (
-							"SignIn to Google"
+							"Sign In to Google"
 						)}
 					</button>
 				) : null}

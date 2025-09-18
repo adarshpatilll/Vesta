@@ -204,14 +204,13 @@ const AddTransactionsPage = () => {
 								className={input?.className}
 							/>
 						) : input.type === "monthSelector" ? (
-							<div className="flex flex-col justify-between gap-1">
+							<div
+								key={index}
+								className="flex flex-col justify-between gap-1"
+							>
 								<h1 className="text-sm">{input.label}</h1>
-								<div
-									className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-3 text-light 
-	           focus:outline-none focus:ring-0 focus:border-yellow-500"
-								>
+								<div className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500">
 									<MonthSelector
-										key={index}
 										value={input.value}
 										onChange={input.onChange}
 									/>

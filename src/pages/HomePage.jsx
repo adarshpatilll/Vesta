@@ -153,7 +153,7 @@ const HomePage = () => {
 
 				{/* Transactions List */}
 				{loading ? (
-					<div className="overflow-y-auto hide-scrollbar p-4 max-h-[42svh]">
+					<div className="overflow-y-auto hide-scrollbar p-4 max-h-[42vh]">
 						<ul className="space-y-3">
 							{[...Array(2)].map((_, i) => (
 								<SkeletonTransaction key={i} />
