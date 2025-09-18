@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { IoIosArrowBack } from "react-icons/io";
 
-const MonthSelector = ({ value, onChange }) => {
+const MonthSelector = ({ value, onChange, navigation = true }) => {
 	const currentMonthKey = dayjs().format("YYYY-MM"); // e.g., "2024-06"
 	const minMonthKey = import.meta.env.VITE_MIN_MONTH_KEY || "2025-07"; // default min month if not set in .env
 
@@ -29,6 +29,7 @@ const MonthSelector = ({ value, onChange }) => {
 	return (
 		<div className="flex items-center justify-between gap-4 text-sm">
 			<button
+				hidden={!navigation}
 				type="button"
 				onClick={handlePrev}
 				disabled={disablePrev}
@@ -42,12 +43,13 @@ const MonthSelector = ({ value, onChange }) => {
 			<span
 				className={`font-medium ${
 					value === currentMonthKey ? "text-orange-300" : "text-light"
-				}`}
+				} ${!navigation && "mx-auto"}`}
 			>
 				{dayjs(value, "YYYY-MM").format("MMMM YYYY")}
 			</span>
 
 			<button
+				hidden={!navigation}
 				type="button"
 				onClick={handleNext}
 				disabled={disableNext}
