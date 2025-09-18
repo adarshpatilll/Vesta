@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { addTransaction } from "../../firebase/firestore/transactions";
-import { useAuth } from "../../context/AuthContext";
-import { useSociety } from "../../context/SocietyContext";
-import { RadioButtonGroup } from "../../components/RadioButtonGroup";
-import { InputField } from "../../components/InputField";
-import ResidentSelectModal from "../../components/ResidentSelectModal.jsx";
+import { addTransaction } from "@/firebase/firestore/transactions";
+import { useAuth } from "@/context/AuthContext";
+import { useSociety } from "@/context/SocietyContext";
+import { RadioButtonGroup } from "@/components/RadioButtonGroup";
+import { InputField } from "@/components/InputField";
+import ResidentSelectModal from "@/components/ResidentSelectModal.jsx";
 import dayjs from "dayjs";
-import MonthSelector from "../../components/MonthSelector.jsx";
+import MonthSelector from "@/components/MonthSelector"; // 👈 for future use
 
 const AddTransactionsPage = () => {
 	const { societyId } = useAuth();

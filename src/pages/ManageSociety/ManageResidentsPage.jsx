@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
 import { Eye, Pencil, PlusCircle } from "lucide-react";
 import ButtonCard from "../../components/ButtonCard";
-import BackButtonOrLink from "../../components/BackButtonOrLink";
 
 const ManageResidentsPage = () => {
 	const location = useLocation();

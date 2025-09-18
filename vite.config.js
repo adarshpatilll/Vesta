@@ -32,11 +32,12 @@ export default defineConfig({
 						type: "image/png",
 					},
 				],
-			},
+			}, // end of manifest
 			workbox: {
 				navigateFallback: "/index.html",
 				globPatterns: ["**/*.{js,css,html,png,svg}"],
-			},
+				maximumFileSizeToCacheInBytes: 6 * 1024 * 1024, // 6 MB limit
+			}, // end of workbox
 		}),
 	],
 	build: {
@@ -46,6 +47,26 @@ export default defineConfig({
 				drop_console: true,
 				drop_debugger: true,
 			},
+		}, // end of build.terserOptions
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ["react", "react-dom", "react-router-dom"],
+					firebase: [
+						"firebase/app",
+						"firebase/auth",
+						"firebase/firestore",
+					],
+					motion: ["framer-motion"],
+					icons: ["react-icons", "lucide-react"],
+					utils: ["dayjs", "exceljs", "file-saver"],
+				},
+			},
+		}, // end of build.rollupOptions
+	},
+	resolve: {
+		alias: {
+			"@": "/src", // This allows you to use '@' as a shorthand for the 'src' directory
 		},
 	},
 });
