@@ -14,7 +14,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 		flatNo: resident.flatNo || "",
 		ownerName: resident.ownerName || "",
 		ownerContact: resident.ownerContact || "",
-		type: resident.type || "owner",
+		type: resident.type || "",
 		tenantName: resident.tenantName || "",
 		tenantContact: resident.tenantContact || "",
 	});
@@ -24,14 +24,17 @@ const EditResidentModal = ({ resident, onClose }) => {
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 
+		// For contact fields, allow only digits and limit to 10 characters
 		if (name === "ownerContact" || name === "tenantContact") {
 			const val = value.replace(/\D/g, "").slice(0, 10);
 			setForm((prev) => ({ ...prev, [name]: val }));
 		} else {
+			// For other fields, update normally
 			setForm((prev) => ({ ...prev, [name]: value }));
 		}
 	};
 
+	// Handle resident type change
 	const handleTypeChange = (value) => {
 		setForm((prev) => ({ ...prev, type: value }));
 	};
@@ -78,33 +81,50 @@ const EditResidentModal = ({ resident, onClose }) => {
 			return;
 		}
 
-		try {
-			toast.promise(
-				updateResident(
-					societyId,
-					resident.id,
-					form.type === "owner"
-						? { ...form }
-						: { ...form, tenantContact: "", tenantName: "" }
-				),
-				{
-					loading: "Updating resident...",
-					success: "Resident updated successfully 🎉",
-					error: "Failed to update resident",
+		console.log("societyId:", societyId);
+		console.log("resident.id:", resident?.id);
+		console.log("form:", form);
+
+		toast.promise(
+			updateResident(
+				societyId,
+				resident.id,
+				form.type === "owner"
+					? { ...form, tenantContact: "", tenantName: "" }
+					: { ...form } // if tenant, keep all fields as it is else clear tenant fields
+			),
+			{
+				loading: "Updating resident...",
+				success: () => {
+					setResidents((prev) =>
+						// if tenant, keep all fields as it is else clear tenant fields
+						prev.map((r) =>
+							r.id === resident.id
+								? {
+										...form,
+										id: resident.id,
+										...(form.type === "owner"
+											? { tenantContact: "", tenantName: "" }
+											: {}),
+								  }
+								: r
+						)
+					);
+
+					onClose();
+
+					return "Resident updated successfully 🎉";
 				},
-				{ duration: 3000 }
-			);
-
-			setResidents((prev) =>
-				prev.map((r) => (r.id === resident.id ? { ...r, ...form } : r))
-			);
-
-			onClose();
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setLoading(false);
-		}
+				error: (err) => {
+					console.error(err);
+					return "Failed to update resident";
+				},
+				finally: () => {
+					setLoading(false);
+				},
+			},
+			{ duration: 3000 }
+		);
 	};
 
 	return (
@@ -152,7 +172,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 							value={form.flatNo}
 							onChange={handleChange}
 							placeholder="Flat No."
-							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light"
+							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500"
 						/>
 					</motion.div>
 
@@ -171,7 +191,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 							value={form.ownerName}
 							onChange={handleChange}
 							placeholder="Owner Name"
-							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light"
+							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500"
 						/>
 					</motion.div>
 
@@ -191,7 +211,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 							onChange={handleChange}
 							maxLength={10}
 							placeholder="Owner Contact"
-							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light"
+							className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500"
 						/>
 					</motion.div>
 
@@ -201,7 +221,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 							hidden: { opacity: 0, y: 20 },
 							visible: { opacity: 1, y: 0 },
 						}}
-						className="flex flex-col gap-1"
+						className="flex flex-col gap-1 justify-between"
 					>
 						<label className="text-sm">Resident Type</label>
 						<div className="flex gap-4">
@@ -260,7 +280,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 									value={form.tenantName}
 									onChange={handleChange}
 									placeholder="Tenant Name"
-									className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light"
+									className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500"
 								/>
 							</motion.div>
 
@@ -279,7 +299,7 @@ const EditResidentModal = ({ resident, onClose }) => {
 									onChange={handleChange}
 									maxLength={10}
 									placeholder="Tenant Contact"
-									className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light"
+									className="w-full rounded-lg border border-neutral-700 bg-neutral-800 p-3 text-light focus:outline-none focus:ring-0 focus:border-yellow-500"
 								/>
 							</motion.div>
 						</>

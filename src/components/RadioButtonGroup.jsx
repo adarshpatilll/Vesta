@@ -7,7 +7,7 @@ export const RadioButtonGroup = ({ label, name, value, onChange, options }) => (
 			visible: { opacity: 1, y: 0 },
 		}}
 		transition={{ duration: 0.2 }}
-		className={`flex flex-col gap-1`}
+		className={`flex flex-col gap-1 justify-between`}
 	>
 		<label className={`text-sm`}>{label}</label>
 
