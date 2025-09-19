@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, m } from "framer-motion";
 import { toast } from "sonner";
 import { useSociety } from "../context/SocietyContext";
 import { markMaintenancePaid } from "../firebase/firestore/paymentCycle";
@@ -164,29 +164,28 @@ const ResidentCard = ({
 									{/* Mark Maintenance Button */}
 									{showMarkMaintenance && (
 										<>
-											<button
-												hidden={isPaid}
-												onClick={() => handleMarkPaid(res)}
-												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-red-700/80 text-light hover:bg-red-700`}
-											>
-												<span className="flex items-center gap-1 truncate">
-													<WalletMinimal size={14} />
-													Mark Maintenance
-												</span>
-											</button>
-
-											<button
-												hidden={
-													!isPaid || monthKey !== currentMonthKey
-												}
-												onClick={() => handleUndoMarkPaid(res)}
-												className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-green-700/80 text-light hover:bg-green-700`}
-											>
-												<span className="flex items-center gap-1 truncate">
-													<Undo2 size={14} />
-													Undo Payment
-												</span>
-											</button>
+											{!isPaid && monthKey === currentMonthKey && (
+												<button
+													onClick={() => handleMarkPaid(res)}
+													className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-red-700/80 text-light hover:bg-red-700`}
+												>
+													<span className="flex items-center gap-1 truncate">
+														<WalletMinimal size={14} />
+														Mark Maintenance
+													</span>
+												</button>
+											)}
+											{isPaid && monthKey === currentMonthKey && (
+												<button
+													onClick={() => handleUndoMarkPaid(res)}
+													className={`absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-md px-3 backdrop-blur-sm font-medium py-1 text-xs shadow-md transition bg-green-700/80 text-light hover:bg-green-700`}
+												>
+													<span className="flex items-center gap-1 truncate">
+														<Undo2 size={14} />
+														Undo Payment
+													</span>
+												</button>
+											)}
 										</>
 									)}
 

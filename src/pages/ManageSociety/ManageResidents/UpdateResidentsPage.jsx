@@ -10,6 +10,7 @@ import { useSociety } from "../../../context/SocietyContext";
 import CircularLoader from "../../../components/CircularLoader";
 import { deleteResident } from "../../../firebase/firestore/residents.js";
 import { toast } from "sonner";
+import SearchBox from "../../../components/SearchBox.jsx";
 
 const UpdateResidentsPage = () => {
 	const [query, setQuery] = useState("");
@@ -90,33 +91,16 @@ const UpdateResidentsPage = () => {
 										</motion.button>
 									</motion.div>
 								) : (
-									<motion.div
-										key="search-open"
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: 6 }}
-										className="flex w-full items-center gap-2"
-									>
-										<motion.input
-											type="text"
-											value={query}
-											onChange={(e) => setQuery(e.target.value)}
-											placeholder="Search resident..."
-											className="text-light h-8 flex-1 rounded-lg border border-neutral-700 bg-neutral-800 px-3 text-sm placeholder-neutral-400 outline-none"
-											autoFocus
-										/>
-										<motion.button
-											onClick={() => {
-												setShowSearch(false);
-												setQuery("");
-											}}
-											className="text-light rounded-md bg-neutral-800 p-2 hover:bg-neutral-700"
-											whileHover={{ scale: 1.08 }}
-											whileTap={{ scale: 0.95 }}
-										>
-											<X size={18} />
-										</motion.button>
-									</motion.div>
+									<SearchBox
+										setShowSearch={setShowSearch}
+										query={query}
+										setQuery={setQuery}
+										placeholderArray={[
+											"flat number",
+											"owner name",
+											"tenant name",
+										]}
+									/>
 								)}
 							</AnimatePresence>
 						</div>
