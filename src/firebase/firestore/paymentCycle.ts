@@ -150,14 +150,15 @@ export async function autoMarkUnpaidResidents(societyId: string) {
 
 		// Agar already paid hai → skip
 		if (currentStatus === "paid") continue;
+		// Agar status missing hai → ab unpaid mark karo
+		else if (!currentStatus) {
+			await updateDoc(docSnap.ref, {
+				[`maintenance.${monthKey}`]: "unpaid",
+				updatedAt: Timestamp.now(),
+			});
+		}
 
-		// Agar status missing ya unpaid hai → ab unpaid mark karo
-		await updateDoc(docSnap.ref, {
-			[`maintenance.${monthKey}`]: "unpaid",
-			updatedAt: Timestamp.now(),
-		});
-
-		// Notification bhi banao
+		// Notification bhi banao unpaid ke liye sirf current month ke liye
 		await addUnpaidNotification(societyId, docSnap.id, monthKey);
 	}
 }

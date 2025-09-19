@@ -24,7 +24,6 @@ export const SocietyProvider = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 
 	// Fetch initial data when user or societyId changes
-
 	useEffect(() => {
 		const fetchData = async () => {
 			setLoading(true);
@@ -32,25 +31,20 @@ export const SocietyProvider = ({ children }) => {
 			try {
 				const [
 					residentsData,
-					notificationsData,
 					balanceData,
 					maintenanceAmountData,
 					paymentCycleData,
 				] = await Promise.all([
 					getAllResidents(societyId),
-					getNotifications(societyId),
 					getBalance(societyId),
 					getMaintenanceAmount(societyId),
 					getPaymentCycle(societyId),
 				]);
 
 				setResidents(residentsData);
-				setNotifications(notificationsData);
 				setBalance(balanceData);
 				setMaintenanceAmount(maintenanceAmountData);
 				setPaymentCycle(paymentCycleData);
-
-				autoMarkUnpaidResidents(societyId);
 			} catch (error) {
 				console.error("Error fetching data at Society Context:", error);
 			} finally {
@@ -60,6 +54,32 @@ export const SocietyProvider = ({ children }) => {
 
 		if (user && societyId) {
 			fetchData();
+		}
+	}, [user, societyId]);
+
+	// Auto mark unpaid residents when component mounts
+	useEffect(() => {
+		if (user && societyId) {
+			autoMarkUnpaidResidents(societyId);
+		}
+	}, [user, societyId]);
+
+	// Real-time updates for notifications
+	useEffect(() => {
+		if (user && societyId) {
+			let unsubscribe;
+
+			// IIFE to handle async function in useEffect
+			(async () => {
+				unsubscribe = await getNotifications(societyId, (data) => {
+					setNotifications(data);
+				});
+			})();
+
+			// Cleanup subscription on unmount
+			return () => {
+				if (unsubscribe) unsubscribe();
+			};
 		}
 	}, [user, societyId]);
 

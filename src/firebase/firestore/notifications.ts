@@ -5,12 +5,17 @@ import {
 	deleteDoc,
 	doc,
 	getDoc,
-	getDocs,
+	onSnapshot,
 	setDoc,
 	Timestamp,
 } from "../firebaseServices";
 
-// Save unpaid notification
+/**
+ * Add notification for unpaid maintenance
+ * @param societyId
+ * @param residentId
+ * @param monthKey
+ */
 export async function addUnpaidNotification(
 	societyId: string,
 	residentId: string,
@@ -46,7 +51,11 @@ export async function addUnpaidNotification(
 	);
 }
 
-// Delete notification once maintenance is paid or status is read
+/**
+ * Delete a notification by ID
+ * @param societyId
+ * @param notificationId // Format: `${residentId}-${monthKey}` (e.g., `resident123-2023-09`)
+ */
 export async function deleteNotification(
 	societyId: string,
 	notificationId: string
@@ -67,14 +76,34 @@ export async function deleteNotification(
 	}
 }
 
-// Get notifications
-export async function getNotifications(societyId: string): Promise<any> {
+/**
+ * Get notifications for a resident
+ * @param societyId
+ * @param callback Optional callback to handle real-time updates
+ * @returns Unsubscribe function to stop listening
+ */
+export async function getNotifications(
+	societyId: string,
+	callback?: (data: any) => void
+): Promise<any> {
 	!societyId && (societyId = await ensureSocietyId(societyId));
 
 	try {
 		const ref = collection(db, "societies", societyId, "notifications");
-		const snap = await getDocs(ref);
-		return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+		// Start listening to changes in the notifications collection
+		const unsubscribe = onSnapshot(ref, (snapshot) => {
+			const data = snapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+			}));
+
+			if (callback) {
+				callback(data);
+			}
+		});
+
+		return unsubscribe; // Return the unsubscribe function to stop listening when needed
 	} catch (error: any) {
 		throw error;
 	}

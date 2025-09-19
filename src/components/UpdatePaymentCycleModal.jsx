@@ -13,7 +13,7 @@ const UpdatePaymentCycleModal = ({
 				initial={{ opacity: 0, scale: 0.9 }}
 				animate={{ opacity: 1, scale: 1 }}
 				exit={{ opacity: 0, scale: 0.9 }}
-				className="bg-dark text-light hide-scrollbar flex flex-col gap-4 relative rounded-xl p-4 shadow-xl sm:rounded-2xl sm:p-6 w-full max-w-md max-xs:w-[90%]"
+				className="bg-dark text-light hide-scrollbar flex flex-col gap-4 relative rounded-xl p-6 shadow-xl sm:rounded-2xl max-w-md min-w-[290px]"
 			>
 				<h2 className="text-light text-lg font-semibold">
 					Update Payment Cycle

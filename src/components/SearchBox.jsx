@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { ReactTyped } from "react-typed";
+import { TypeAnimation } from "react-type-animation";
 
 export default function SearchBox({
 	setShowSearch,
@@ -29,12 +29,14 @@ export default function SearchBox({
 				{/* Typing placeholder */}
 				{!query && (
 					<span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400">
-						Search by{" "}
-						<ReactTyped
-							strings={placeholderArray}
-							typeSpeed={50}
-							backSpeed={30}
-							loop
+						<TypeAnimation
+							sequence={placeholderArray.flatMap((p) => [
+								`Search by "${p}"`,
+								500,
+							])}
+							wrapper="span"
+							speed={50}
+							repeat={Infinity}
 						/>
 					</span>
 				)}

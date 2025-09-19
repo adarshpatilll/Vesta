@@ -11,6 +11,7 @@ import {
 	addDoc,
 	where,
 	query,
+	onSnapshot,
 } from "firebase/firestore";
 import {
 	createUserWithEmailAndPassword,
@@ -32,6 +33,7 @@ export {
 	addDoc,
 	where,
 	query,
+	onSnapshot,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword,
 	signOut,
