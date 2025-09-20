@@ -49,7 +49,8 @@ const LoginPage = () => {
 		setIsLoading(true);
 
 		try {
-			await loginAdmin(email, password);
+			const { isAuthorizedBySuperAdmin } = await loginAdmin(email, password);
+         
 			navigate("/", { replace: true });
 		} catch (error) {
 			console.error("Error during login:", error);
@@ -65,7 +66,6 @@ const LoginPage = () => {
 			}
 		} finally {
 			setIsLoading(false);
-			setEmail("");
 			setPassword("");
 		}
 	};

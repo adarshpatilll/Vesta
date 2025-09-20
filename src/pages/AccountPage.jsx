@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { MailIcon, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import Divider from "../components/Divider";
-import CircularLoader from "../components/CircularLoader";
-import PaymentCycle from "../components/PaymentCycle";
-import MaintenanceAmount from "../components/MaintenanceAmount";
-import ExportDataPage from "../components/ExportDataPage";
-import { motion } from 'framer-motion';
+import Divider from "@/components/Divider";
+import CircularLoader from "@/components/CircularLoader";
+import PaymentCycle from "@/components/PaymentCycle";
+import MaintenanceAmount from "@/components/MaintenanceAmount";
+import ExportDataPage from "@/components/ExportDataPage";
+import { motion } from "framer-motion";
 
 const AccountPage = () => {
 	const { user, loading: authLoading, getAdminDetails } = useAuth();

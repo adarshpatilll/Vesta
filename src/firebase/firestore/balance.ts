@@ -35,9 +35,11 @@ export async function updateBalance(
 
 		// ---- Update Global Total ----
 		if (totalSnap.exists()) {
+			// Update existing total
 			const current = Number(totalSnap.data().total) || 0;
 			await updateDoc(totalRef, { total: current + delta });
 		} else {
+			// First time create
 			await setDoc(totalRef, { total: delta });
 		}
 

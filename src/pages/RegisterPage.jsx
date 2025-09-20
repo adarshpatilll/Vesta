@@ -66,11 +66,14 @@ const RegisterPage = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
+		// Validate form inputs
 		if (!validateForm()) return;
 
 		setIsLoading(true);
+
 		try {
-			// convert societyId (Shayam Kunj) to camelCase (shyamKunj)
+			// convert societyId (Shayam Kunj) to camelCase (shayam-kunj)
 			const convertedSocietyId = societyId
 				.trim()
 				.replace(/\s+/g, " ")

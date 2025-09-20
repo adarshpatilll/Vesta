@@ -12,6 +12,8 @@ import {
 	where,
 	query,
 	onSnapshot,
+	writeBatch,
+	collectionGroup,
 } from "firebase/firestore";
 import {
 	createUserWithEmailAndPassword,
@@ -34,6 +36,8 @@ export {
 	where,
 	query,
 	onSnapshot,
+	writeBatch,
+	collectionGroup,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword,
 	signOut,

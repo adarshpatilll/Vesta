@@ -218,7 +218,7 @@ const ExportDataPage = ({ onClose, exportType }) => {
 			) : null}
 
 			{/* Range Selector */}
-			{exportType === "excel" || (exportType === "sheets" && token) ? (
+			{!fetchLoading && (exportType === "excel" || (exportType === "sheets" && token)) ? (
 				<div className="flex flex-col gap-2">
 					<p className="text-sm text-neutral-400">Select Range</p>
 					<div className="flex items-center justify-between gap-4 text-sm bg-neutral-800 rounded-lg border border-neutral-700 px-3 py-2">

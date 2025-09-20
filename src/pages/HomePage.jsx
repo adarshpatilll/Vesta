@@ -35,7 +35,10 @@ const HomePage = () => {
 				setTimeout(() => setBalanceLoading(false), 300); // slight delay for better UX
 			}
 		};
-		fetchBalance();
+
+		if (societyId && monthKey) {
+			fetchBalance();
+		}
 	}, [societyId, monthKey]);
 
 	// Fetch transactions
@@ -52,7 +55,9 @@ const HomePage = () => {
 			}
 		};
 
-		fetchTx();
+		if (societyId && monthKey) {
+			fetchTx();
+		}
 	}, [societyId, monthKey]);
 
 	const filteredTx = transactions.filter((t) => t.type === selectedTab);

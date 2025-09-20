@@ -22,8 +22,14 @@ export const AuthProvider = ({ children }) => {
 			if (currentUser) {
 				setUser(currentUser);
 				setIsAuthenticated(true);
-				const societyId = await findSocietyIdByUid(currentUser.uid);
-				setSocietyId(societyId);
+
+				try {
+					const societyId = await findSocietyIdByUid(currentUser.uid);
+					setSocietyId(societyId);
+				} catch (err) {
+					console.error("❌ Error fetching societyId:", err);
+					setSocietyId(null);
+				}
 			} else {
 				setUser(null);
 				setSocietyId(null);

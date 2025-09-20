@@ -12,6 +12,10 @@ import {
 	db,
 	auth,
 	updateDoc,
+	writeBatch,
+	query,
+	collectionGroup,
+	where,
 } from "../firebaseServices";
 import { updateBalance } from "./balance";
 import { setMaintenanceAmount } from "./maintenanceAmount";
@@ -28,19 +32,17 @@ export const findSocietyIdByUid = async (uid: string) => {
 	}
 
 	try {
-		const societiesRef = collection(db, "societies");
-		const societiesSnap = await getDocs(societiesRef);
+		const adminQuery = query(
+			collectionGroup(db, "admins"),
+			where("id", "==", uid)
+		);
+		const snap = await getDocs(adminQuery);
 
-		for (const societyDoc of societiesSnap.docs) {
-			const adminRef = doc(db, "societies", societyDoc.id, "admins", uid);
-			const adminSnap = await getDoc(adminRef);
-
-			if (adminSnap.exists()) {
-				return societyDoc.id;
-			}
+		if (snap.empty) {
+			throw new Error("Admin not found");
 		}
 
-		throw new Error("Society not found");
+		return snap.docs[0].data().societyId;
 	} catch (error) {
 		throw error;
 	}
@@ -71,45 +73,72 @@ export const registerAdmin = async (
 		const societyRef = doc(db, "societies", data.societyId);
 		const societySnap = await getDoc(societyRef);
 		if (!societySnap.exists()) {
-			await setDoc(
-				societyRef,
-				{
-					createdAt: Timestamp.now(),
-					createdBy: { id: user.uid, name: data.name, email: email },
+			await setDoc(societyRef, {
+				createdAt: Timestamp.now(),
+				createdBy: {
+					id: user.uid,
+					name: data.name,
+					email,
 				},
-				{ merge: true }
-			); // Create if not exists
+			});
 		}
 
-		let isFirstAdmin = false; // Flag to indicate if this is the first admin
+		const adminRef = collection(societyRef, "admins");
+		const existingAdminsSnap = await getDocs(adminRef);
+		const isFirstAdmin = existingAdminsSnap.empty;
 
-		// Set default payment cycle (1-10) and maintenance amount (500) if this is a new society
-		const existingAdminsSnap = await getDocs(
-			collection(db, "societies", data.societyId, "admins")
-		);
-		if (existingAdminsSnap.empty) {
-			isFirstAdmin = true;
-			// First admin for this society, set defaults
-			await setPaymentCycle(data.societyId, 1, 10); // Default payment cycle to 1-10, can be changed later
-			await setMaintenanceAmount(data.societyId, 500); // Default maintenance amount to 500, can be changed later
+		const batch = writeBatch(db);
+
+		// If first admin for this society, set defaults
+		if (isFirstAdmin) {
+			await setPaymentCycle(data.societyId, 1, 10); // Default cycle 1-10 of month
+			await setMaintenanceAmount(data.societyId, 500); // Default amount 500
 			await updateBalance(data.societyId, 0, "initial"); // Initialize balance to 0
 		}
 
 		// Add admin details to Firestore
-		const adminRef = doc(db, "societies", data.societyId, "admins", user.uid);
-		await setDoc(adminRef, {
+		batch.set(doc(adminRef, user.uid), {
 			id: user.uid,
 			name: data.name,
-			email: email,
+			email,
 			phone: data.phone,
 			flatNo: data.flatNo,
 			societyId: data.societyId,
 			googleSheetToken: null,
 			isSuperAdmin: isFirstAdmin, // First admin is super admin
+			isAuthorizedBySuperAdmin: isFirstAdmin, // First admin is authorized by default
 			createdAt: Timestamp.now(),
 		});
 
+		await batch.commit();
+
 		return { user, isFirstAdmin };
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const loginAdmin = async (email: string, password: string) => {
+	try {
+		// Step 1: Auth login
+		const userCredential = await signInWithEmailAndPassword(
+			auth,
+			email,
+			password
+		);
+		const user = userCredential.user;
+
+		// Step 2: Fetch admin doc
+		const adminQuery = query(
+			collectionGroup(db, "admins"),
+			where("id", "==", user.uid)
+		);
+		const snap = await getDocs(adminQuery);
+		const adminDoc = snap.docs[0].data();
+
+		const { societyId, isAuthorizedBySuperAdmin } = adminDoc;
+
+		return { user, societyId, isAuthorizedBySuperAdmin, adminDoc };
 	} catch (error) {
 		throw error;
 	}
@@ -162,28 +191,6 @@ export const getGoogleSheetToken = async () => {
 	}
 };
 
-// Login admin
-export const loginAdmin = async (email: string, password: string) => {
-	try {
-		const userCredential = await signInWithEmailAndPassword(
-			auth,
-			email,
-			password
-		);
-		const user = userCredential.user;
-
-		// Find societyId by uid
-		const societyId = await findSocietyIdByUid(user.uid);
-		if (!societyId) {
-			throw new Error("Society not found for this admin");
-		}
-
-		return { user, societyId };
-	} catch (error) {
-		throw error;
-	}
-};
-
 // Get admin details
 export const getAdminDetails = async (uid: string, societyId: string) => {
 	if (!uid) {
@@ -208,6 +215,31 @@ export const getAdminDetails = async (uid: string, societyId: string) => {
 		} else {
 			throw new Error("Admin not found");
 		}
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Get all admins in a society
+export const getAllAdmins = async (societyId: string) => {
+	// Ensure societyId is provided
+	!societyId && (societyId = await ensureSocietyId());
+
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+
+	try {
+		const adminRef = collection(db, "societies", societyId, "admins");
+		const snap = await getDocs(adminRef);
+
+		// Exclude current user from the list
+		const admins = snap.docs
+			.map((doc) => doc.data())
+			.filter((admin) => admin.id !== user.uid);
+
+		return admins;
 	} catch (error) {
 		throw error;
 	}
