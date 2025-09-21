@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import Divider from "../components/Divider";
 import { useAuth } from "../context/AuthContext";
+import { loginAdmin } from "@/firebase/firestore/admin";
 
 const LoginPage = () => {
 	const [email, setEmail] = useState("");
@@ -15,8 +16,6 @@ const LoginPage = () => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const navigate = useNavigate();
-
-	const { loginAdmin } = useAuth();
 
 	const validateForm = () => {
 		let valid = true;
@@ -50,8 +49,11 @@ const LoginPage = () => {
 
 		try {
 			const { isAuthorizedBySuperAdmin } = await loginAdmin(email, password);
-         
-			navigate("/", { replace: true });
+			if (!isAuthorizedBySuperAdmin) {
+				navigate("/access-denied", { replace: true });
+			} else {
+				navigate("/", { replace: true });
+			}
 		} catch (error) {
 			console.error("Error during login:", error);
 

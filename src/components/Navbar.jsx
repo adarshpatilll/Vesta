@@ -15,7 +15,7 @@ const links = [
 ];
 
 const Navbar = () => {
-	const { logoutAdmin, getAdminDetails, setUser, setSocietyId } = useAuth();
+	const { logoutAdmin, user, setLoading } = useAuth();
 	const {
 		setResidents,
 		setNotifications,
@@ -25,34 +25,26 @@ const Navbar = () => {
 		notifications,
 	} = useSociety();
 
-	const [userDetails, setUserDetails] = useState(null);
 	const [notificationModalOpen, setNotificationModalOpen] = useState(false);
-
-	useEffect(() => {
-		const fetchUserDetails = async () => {
-			const details = await getAdminDetails();
-			setUserDetails(details);
-		};
-
-		fetchUserDetails();
-	}, [getAdminDetails]);
 
 	// Set initial context state on logout to avoid stale data issues after logout and login with different user
 	const handleLogout = async () => {
+		setLoading(true);
 		try {
 			await logoutAdmin();
-			setUser(null);
-			setSocietyId(null);
 			setResidents([]);
 			setNotifications([]);
 			setBalance(null);
 			setMaintenanceAmount(null);
 			setPaymentCycle(null);
-			toast.success(`Goodbye, ${userDetails?.name || "Investor"}!`, {
+			toast.success(`Goodbye, ${user?.adminDetails?.name || "Investor"}!`, {
 				duration: 3000,
 			});
 		} catch (error) {
+			console.log("Error logging out:", error);
 			toast.error("Failed to log out. Try again.");
+		} finally {
+			setLoading(false);
 		}
 	};
 

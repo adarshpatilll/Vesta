@@ -27,6 +27,7 @@ import UpdateResidentsPage from "../pages/ManageSociety/ManageResidents/UpdateRe
 import ViewResidentsPage from "../pages/ManageSociety/ManageResidents/ViewResidentsPage";
 import TermsPage from "./../pages/TermsPage";
 import PrivacyPage from "./../pages/PrivacyPage";
+import AccessDeniedPage from "@/pages/AccessDeniedPage";
 
 const PublicRoutesArray = [
 	{
@@ -108,6 +109,10 @@ const router = createBrowserRouter([
 	{
 		path: "/privacy",
 		element: <PrivacyPage />,
+	},
+	{
+		path: "/access-denied",
+		element: <AccessDeniedPage />,
 	},
 
 	// Protected Routes

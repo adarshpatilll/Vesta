@@ -10,38 +10,12 @@ import ExportDataPage from "@/components/ExportDataPage";
 import { motion } from "framer-motion";
 
 const AccountPage = () => {
-	const { user, loading: authLoading, getAdminDetails } = useAuth();
+	const { user } = useAuth();
 
-	const [profile, setProfile] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const profile = user?.adminDetails || null;
 
 	const [showExportModal, setShowExportModal] = useState(false);
 	const [exportType, setExportType] = useState(""); // "excel" or "sheets"
-
-	// Fetch Admin details
-	useEffect(() => {
-		const fetchProfile = async () => {
-			if (user) {
-				try {
-					// Fetch current user details
-					const details = await getAdminDetails(user.uid);
-					setProfile(details);
-				} catch (err) {
-					console.error("Error fetching user details:", err);
-				} finally {
-					setLoading(false);
-				}
-			} else {
-				setLoading(false);
-			}
-		};
-
-		fetchProfile();
-	}, [user]);
-
-	if (loading || authLoading) {
-		return <CircularLoader label="Loading Account..." />;
-	}
 
 	if (!user) {
 		return (

@@ -48,6 +48,19 @@ export const findSocietyIdByUid = async (uid: string) => {
 	}
 };
 
+interface IAdmin {
+	id?: string;
+	name: string;
+	email: string;
+	phone: string;
+	flatNo: string;
+	societyId: string;
+	googleSheetToken: string | null;
+	isSuperAdmin: boolean;
+	isAuthorizedBySuperAdmin: boolean;
+	createdAt: Timestamp;
+}
+
 // Register a new admin and set default payment cycle and maintenance amount
 export const registerAdmin = async (
 	data: {
@@ -118,7 +131,15 @@ export const registerAdmin = async (
 	}
 };
 
-export const loginAdmin = async (email: string, password: string) => {
+export const loginAdmin = async (
+	email: string,
+	password: string
+): Promise<{
+	user: any;
+	societyId: string;
+	isAuthorizedBySuperAdmin: boolean;
+	adminDoc: IAdmin;
+}> => {
 	try {
 		// Step 1: Auth login
 		const userCredential = await signInWithEmailAndPassword(
@@ -134,7 +155,7 @@ export const loginAdmin = async (email: string, password: string) => {
 			where("id", "==", user.uid)
 		);
 		const snap = await getDocs(adminQuery);
-		const adminDoc = snap.docs[0].data();
+		const adminDoc = snap.docs[0].data() as IAdmin;
 
 		const { societyId, isAuthorizedBySuperAdmin } = adminDoc;
 
@@ -192,7 +213,10 @@ export const getGoogleSheetToken = async () => {
 };
 
 // Get admin details
-export const getAdminDetails = async (uid: string, societyId: string) => {
+export const getAdminDetails = async (
+	uid: string,
+	societyId?: string
+): Promise<IAdmin> => {
 	if (!uid) {
 		const user = auth.currentUser;
 		if (!user) {
@@ -211,7 +235,7 @@ export const getAdminDetails = async (uid: string, societyId: string) => {
 		const adminSnap = await getDoc(adminRef);
 
 		if (adminSnap.exists()) {
-			return { uid, ...adminSnap.data() };
+			return { ...(adminSnap.data() as IAdmin) };
 		} else {
 			throw new Error("Admin not found");
 		}

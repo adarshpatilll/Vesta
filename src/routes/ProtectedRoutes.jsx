@@ -8,7 +8,7 @@ const ProtectedRoutes = () => {
 	if (loading) {
 		return (
 			<div className="h-screen w-full bg-dark text-light">
-				<CircularLoader />
+				<CircularLoader label="Loading User..." />
 			</div>
 		);
 	}

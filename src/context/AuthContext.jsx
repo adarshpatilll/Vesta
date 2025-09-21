@@ -12,29 +12,42 @@ import {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const [user, setUser] = useState();
 	const [societyId, setSocietyId] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-			if (currentUser) {
-				setUser(currentUser);
-				setIsAuthenticated(true);
+			setLoading(true);
 
+			if (currentUser) {
 				try {
-					const societyId = await findSocietyIdByUid(currentUser.uid);
-					setSocietyId(societyId);
+					const adminDetails = await getAdminDetails(currentUser.uid);
+					if (adminDetails && adminDetails.isAuthorizedBySuperAdmin) {
+						// User is authenticated and authorized
+						setUser({
+							...currentUser,
+							adminDetails,
+						});
+						setSocietyId(adminDetails.societyId);
+						setIsAuthenticated(true);
+					} else {
+						// User is not authorized
+						await logoutAdmin();
+					}
 				} catch (err) {
-					console.error("❌ Error fetching societyId:", err);
-					setSocietyId(null);
+					// Handle error fetching admin details
+					console.error("❌ Error fetching admin details:", err);
+					await logoutAdmin();
 				}
 			} else {
+				// No user is signed in
 				setUser(null);
 				setSocietyId(null);
 				setIsAuthenticated(false);
 			}
+
 			setLoading(false);
 		});
 
@@ -51,6 +64,7 @@ export const AuthProvider = ({ children }) => {
 				setSocietyId,
 
 				loading,
+				setLoading,
 				isAuthenticated,
 
 				loginAdmin,

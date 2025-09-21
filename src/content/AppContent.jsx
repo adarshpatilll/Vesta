@@ -3,32 +3,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const AppContent = () => {
-   const location = useLocation();
-   const [path, setPath] = useState(location.pathname);
+	const location = useLocation();
+	const [path, setPath] = useState(location.pathname);
 
-   useEffect(() => {
-      setPath(location.pathname);
-   }, [location.pathname]);
+	useEffect(() => {
+		setPath(location.pathname);
+	}, [location.pathname]);
 
-   // Paths with a different background (like login/register/reset)
-   const darkBgPaths = [
-      "/login",
-      "/register",
-      "/reset-password",
-      "/new-password",
-   ];
+	// Paths with a different background (like login/register/reset)
+	const darkBgPaths = [
+		"/login",
+		"/register",
+		"/reset-password",
+		"/new-password",
+	];
 
-   const bgClass = darkBgPaths.includes(path) ? "bg-neutral-950" : "bg-dark";
+	const bgClass = darkBgPaths.includes(path) ? "bg-neutral-950" : "bg-dark";
 
-   return (
-      <div id="appContentWrapper" className={`${bgClass}`}>
-         <AnimatePresence mode="wait">
-            <motion.div id="appContent" key={location.pathname}>
-               <Outlet />
-            </motion.div>
-         </AnimatePresence>
-      </div>
-   );
+	return (
+		<div id="appContentWrapper" className={`${bgClass}`}>
+			<AnimatePresence mode="wait">
+				<motion.div id="appContent" key={location.pathname}>
+					<Outlet />
+				</motion.div>
+			</AnimatePresence>
+		</div>
+	);
 };
 
 export default AppContent;
