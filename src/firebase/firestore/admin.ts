@@ -16,6 +16,7 @@ import {
 	query,
 	collectionGroup,
 	where,
+	addDoc,
 } from "../firebaseServices";
 import { updateBalance } from "./balance";
 import { setMaintenanceAmount } from "./maintenanceAmount";
@@ -58,7 +59,9 @@ interface IAdmin {
 	googleSheetToken: string | null;
 	isSuperAdmin: boolean;
 	isAuthorizedBySuperAdmin: boolean;
+	isEditAccess?: boolean;
 	createdAt: Timestamp;
+	updatedAt?: Timestamp;
 }
 
 // Register a new admin and set default payment cycle and maintenance amount
@@ -71,46 +74,52 @@ export const registerAdmin = async (
 	},
 	email: string,
 	password: string
-) => {
+): Promise<{
+	user: any;
+	isFirstAdmin: boolean;
+	adminDetails: IAdmin;
+}> => {
 	try {
-		// Create user in Firebase Authentication
+		// 1️⃣ Create user in Firebase Auth
 		const userCredential = await createUserWithEmailAndPassword(
 			auth,
 			email,
 			password
 		);
-
 		const user = userCredential.user;
 
-		// Create society document if not exists
-		const societyRef = doc(db, "societies", data.societyId);
+		// 2️⃣ Convert societyId to Firestore-safe ID if needed
+		const societyRef = doc(
+			db,
+			"societies",
+			data.societyId.trim().replace(/\s+/g, "-").toLowerCase() // Firestore-safe ID conversion: Shyam Kunj  -> shyam-kunj
+		);
+
+		// 3️⃣ Check if society exists
 		const societySnap = await getDoc(societyRef);
-		if (!societySnap.exists()) {
+		const isFirstAdmin = !societySnap.exists();
+
+		// 4️⃣ If society doesn’t exist, create it
+		if (isFirstAdmin) {
 			await setDoc(societyRef, {
 				createdAt: Timestamp.now(),
+				updatedAt: Timestamp.now(),
 				createdBy: {
 					id: user.uid,
 					name: data.name,
 					email,
 				},
 			});
+
+			// Set defaults for first admin
+			await setPaymentCycle(data.societyId, 1, 10);
+			await setMaintenanceAmount(data.societyId, 500);
+			await updateBalance(data.societyId, 0, "initial");
 		}
 
-		const adminRef = collection(societyRef, "admins");
-		const existingAdminsSnap = await getDocs(adminRef);
-		const isFirstAdmin = existingAdminsSnap.empty;
-
-		const batch = writeBatch(db);
-
-		// If first admin for this society, set defaults
-		if (isFirstAdmin) {
-			await setPaymentCycle(data.societyId, 1, 10); // Default cycle 1-10 of month
-			await setMaintenanceAmount(data.societyId, 500); // Default amount 500
-			await updateBalance(data.societyId, 0, "initial"); // Initialize balance to 0
-		}
-
-		// Add admin details to Firestore
-		batch.set(doc(adminRef, user.uid), {
+		// 5️⃣ Add admin to society admins collection
+		const adminRef = doc(collection(societyRef, "admins"), user.uid);
+		await setDoc(adminRef, {
 			id: user.uid,
 			name: data.name,
 			email,
@@ -118,15 +127,32 @@ export const registerAdmin = async (
 			flatNo: data.flatNo,
 			societyId: data.societyId,
 			googleSheetToken: null,
-			isSuperAdmin: isFirstAdmin, // First admin is super admin
-			isAuthorizedBySuperAdmin: isFirstAdmin, // First admin is authorized by default
+			isSuperAdmin: isFirstAdmin,
+			isAuthorizedBySuperAdmin: isFirstAdmin,
+			isEditAccess: isFirstAdmin,
 			createdAt: Timestamp.now(),
 		});
 
-		await batch.commit();
-
-		return { user, isFirstAdmin };
+		// Also return data needed for context so that we don't have to fetch again
+		return {
+			user: user as any,
+			isFirstAdmin: isFirstAdmin as boolean,
+			adminDetails: {
+				id: user.uid,
+				name: data.name,
+				email,
+				phone: data.phone,
+				flatNo: data.flatNo,
+				societyId: data.societyId,
+				googleSheetToken: null,
+				isSuperAdmin: isFirstAdmin,
+				isAuthorizedBySuperAdmin: isFirstAdmin,
+				isEditAccess: isFirstAdmin,
+				createdAt: Timestamp.now(),
+			} as IAdmin,
+		};
 	} catch (error) {
+		console.error("Error registering admin:", error);
 		throw error;
 	}
 };
@@ -187,6 +213,33 @@ export const updateGoogleSheetToken = async (token: string) => {
 	}
 };
 
+// Update admin profile details
+export const updateAdminDetails = async (data: {
+	name?: string;
+	email?: string;
+	phone?: string;
+	flatNo?: string;
+}) => {
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+
+	try {
+		const societyId = await ensureSocietyId();
+		if (!societyId) {
+			throw new Error("Society not found");
+		}
+
+		const adminRef = doc(db, "societies", societyId, "admins", user.uid);
+		await updateDoc(adminRef, data);
+
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
 // Get googleSheetToken for admin
 export const getGoogleSheetToken = async () => {
 	const user = auth.currentUser;
@@ -239,6 +292,121 @@ export const getAdminDetails = async (
 		} else {
 			throw new Error("Admin not found");
 		}
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Authorize or unauthorize an admin (only by super admin)
+export const authorizeOrUnauthorizeAdmin = async (
+	adminId: string,
+	authorize: boolean
+) => {
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+	// Ensure current user is super admin
+	const currentAdminDetails = await getAdminDetails(user.uid);
+	if (!currentAdminDetails.isSuperAdmin) {
+		throw new Error("Only super admin can authorize other admins");
+	}
+
+	try {
+		const societyId = await ensureSocietyId();
+		if (!societyId) {
+			throw new Error("Society not found");
+		}
+
+		const adminRef = doc(db, "societies", societyId, "admins", adminId);
+		// if athorize is false, also remove edit access
+		if (!authorize) {
+			await updateDoc(adminRef, {
+				isAuthorizedBySuperAdmin: authorize,
+				isEditAccess: false,
+			});
+			return true;
+		}
+
+		await updateDoc(adminRef, { isAuthorizedBySuperAdmin: authorize });
+
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Surrender super admin role to another admin
+export const surrenderSuperAdminRole = async (newSuperAdminId: string) => {
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+
+	// Ensure current user is super admin
+	const currentAdminDetails = await getAdminDetails(user.uid);
+	if (!currentAdminDetails.isSuperAdmin) {
+		throw new Error("Only super admin can surrender their role");
+	}
+
+	try {
+		const societyId = await ensureSocietyId();
+		if (!societyId) {
+			throw new Error("Society not found");
+		}
+
+		// Assign super admin role to new user
+		const newSuperAdminRef = doc(
+			db,
+			"societies",
+			societyId,
+			"admins",
+			newSuperAdminId
+		);
+		await updateDoc(newSuperAdminRef, { isSuperAdmin: true });
+
+		// Remove super admin role from current user
+		const currentAdminRef = doc(
+			db,
+			"societies",
+			societyId,
+			"admins",
+			user.uid
+		);
+		await updateDoc(currentAdminRef, { isSuperAdmin: false });
+
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Give or remove edit access to an admin
+export const giveOrRemoveEditAccess = async (
+	adminId: string,
+	giveAccess: boolean
+) => {
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+
+	// Ensure current user is super admin
+	const currentAdminDetails = await getAdminDetails(user.uid);
+	if (!currentAdminDetails.isSuperAdmin) {
+		throw new Error("Only super admin can give or remove edit access");
+	}
+
+	try {
+		const societyId = await ensureSocietyId();
+		if (!societyId) {
+			throw new Error("Society not found");
+		}
+
+		const adminRef = doc(db, "societies", societyId, "admins", adminId);
+		await updateDoc(adminRef, { isEditAccess: giveAccess });
+
+		return true;
 	} catch (error) {
 		throw error;
 	}

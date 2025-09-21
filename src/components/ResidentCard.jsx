@@ -7,6 +7,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import MaintenanceHistoryModal from "./MaintenanceHistoryModal";
 import { useState } from "react";
 import getMonthKey from "../utils/getMonthKey";
+import { useAuth } from "@/context/AuthContext";
 
 const ResidentCard = ({
 	filteredResidents,
@@ -16,6 +17,7 @@ const ResidentCard = ({
 	onDelete,
 }) => {
 	const { societyId, setResidents } = useSociety();
+	const { isEditAccess } = useAuth();
 	const currentMonthKey = getMonthKey();
 
 	const handleMarkPaid = async (resident) => {
@@ -162,7 +164,7 @@ const ResidentCard = ({
 									</div>
 
 									{/* Mark Maintenance Button */}
-									{showMarkMaintenance && (
+									{showMarkMaintenance && isEditAccess && (
 										<>
 											{!isPaid && monthKey === currentMonthKey && (
 												<button

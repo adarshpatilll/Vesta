@@ -3,19 +3,47 @@ import { useAuth } from "@/context/AuthContext";
 import { MailIcon, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import Divider from "@/components/Divider";
-import CircularLoader from "@/components/CircularLoader";
 import PaymentCycle from "@/components/PaymentCycle";
 import MaintenanceAmount from "@/components/MaintenanceAmount";
 import ExportDataPage from "@/components/ExportDataPage";
 import { motion } from "framer-motion";
+import UpdateProfileModal from "@/components/UpdateProfileModal";
+import { getAllAdmins } from "@/firebase/firestore/admin";
+import ManageAdminAccessModal from "@/components/ManageAdminAccessModal";
 
 const AccountPage = () => {
-	const { user } = useAuth();
+	const { user, isSuperAdmin, setUser, setIsSuperAdmin } = useAuth();
 
 	const profile = user?.adminDetails || null;
+	const [showUpdateProfileModal, setShowUpdateProfileModal] = useState(false);
 
 	const [showExportModal, setShowExportModal] = useState(false);
 	const [exportType, setExportType] = useState(""); // "excel" or "sheets"
+
+	const [allAdmins, setAllAdmins] = useState([]);
+	const [loadingAdmins, setLoadingAdmins] = useState(false);
+
+	const [showManageAdminAccessModal, setShowManageAdminAccessModal] =
+		useState(false);
+
+	useEffect(() => {
+		const fetchAllAdmins = async () => {
+			setLoadingAdmins(true);
+			try {
+				// Fetch all admins from Firestore
+				const admins = await getAllAdmins();
+				setAllAdmins(admins);
+			} catch (error) {
+				console.error("❌ Error fetching admins:", error);
+			} finally {
+				setLoadingAdmins(false);
+			}
+		};
+
+		if (profile?.isSuperAdmin) {
+			fetchAllAdmins();
+		}
+	}, []);
 
 	if (!user) {
 		return (
@@ -70,10 +98,10 @@ const AccountPage = () => {
 						className="flex flex-col items-center gap-3 md:flex-row md:justify-between md:gap-5"
 					>
 						<motion.div
-							initial={{ scale: 0.8, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							transition={{ duration: 0.5, delay: 0.3 }}
-							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.9 }}
+							whileHover={{ scale: 1.06 }}
+							transition={{ type: "spring", stiffness: 300 }}
+							onClick={() => setShowUpdateProfileModal(true)}
 							className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-yellow-500 bg-neutral-800 shadow-md md:h-18 md:w-20"
 						>
 							{name !== "Anonymous" ? (
@@ -112,21 +140,60 @@ const AccountPage = () => {
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.4 }}
+						transition={{ duration: 0.5, delay: 0.3 }}
 					>
-						<PaymentCycle societyId={profile?.societyId} />
+						<PaymentCycle
+							isSuperAdmin={isSuperAdmin}
+							societyId={profile?.societyId}
+						/>
 					</motion.div>
-
-					<Divider className="my-5 md:my-6" />
 
 					{/* Update Maintenance Amount */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.5 }}
+						transition={{ duration: 0.5, delay: 0.4 }}
+						className="mt-5 md:mt-6"
 					>
-						<MaintenanceAmount societyId={profile?.societyId} />
+						<MaintenanceAmount
+							isSuperAdmin={isSuperAdmin}
+							societyId={profile?.societyId}
+						/>
 					</motion.div>
+
+					{isSuperAdmin && (
+						<>
+							<Divider className="my-5 md:my-6" />
+
+							{/* Manage Admin Access */}
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.5 }}
+							>
+								<div className="flex flex-col gap-3">
+									<h3 className="text-light text-base font-semibold md:text-lg">
+										Manage Admin Access
+									</h3>
+
+									<div className="flex flex-col items-center justify-between gap-2 rounded-lg border border-neutral-700 px-3 py-2 sm:flex-row">
+										<span className="text-light/70 text-sm text-center">
+											Click on button to manage admin access.
+										</span>
+
+										<button
+											onClick={() =>
+												setShowManageAdminAccessModal(true)
+											}
+											className="rounded-lg bg-rose-700/30 border border-rose-700 px-3 py-1 text-light hover:bg-rose-600 text-xs sm:text-sm transition"
+										>
+											<span>Manage Admin Access</span>
+										</button>
+									</div>
+								</div>
+							</motion.div>
+						</>
+					)}
 
 					<Divider className="my-5 md:my-6" />
 
@@ -134,7 +201,7 @@ const AccountPage = () => {
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.5 }}
+						transition={{ duration: 0.5, delay: 0.8 }}
 					>
 						<div className="flex flex-col gap-3">
 							<h3 className="text-light text-base font-semibold md:text-lg">
@@ -158,13 +225,12 @@ const AccountPage = () => {
 						</div>
 					</motion.div>
 
-					<Divider className="my-5 md:my-6" />
-
 					{/* Sync Data to Google Sheets */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.5 }}
+						transition={{ duration: 0.5, delay: 0.9 }}
+						className="mt-5 md:mt-6"
 					>
 						<div className="flex flex-col gap-3">
 							<h3 className="text-light text-base font-semibold md:text-lg">
@@ -194,7 +260,7 @@ const AccountPage = () => {
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.5 }}
+						transition={{ duration: 0.5, delay: 0.1 }}
 						className="flex flex-col gap-2"
 					>
 						<h3 className="text-light text-base sm:text-lg font-semibold">
@@ -228,7 +294,7 @@ const AccountPage = () => {
 						className="text-center text-sm text-neutral-400"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.6 }}
+						transition={{ duration: 0.5, delay: 0.11 }}
 					>
 						<Link
 							to="/"
@@ -247,6 +313,25 @@ const AccountPage = () => {
 						exportType={exportType}
 					/>
 				</div>
+			)}
+
+			{showUpdateProfileModal && (
+				<UpdateProfileModal
+					profileData={{ name, email, phone, flatNo }}
+					onClose={() => setShowUpdateProfileModal(false)}
+				/>
+			)}
+
+			{/* Manage Admin Access Modal */}
+			{showManageAdminAccessModal && (
+				<ManageAdminAccessModal
+					allAdmins={allAdmins}
+               setAllAdmins={setAllAdmins}
+					loadingAdmins={loadingAdmins}
+					setUser={setUser}
+					setIsSuperAdmin={setIsSuperAdmin}
+					onClose={() => setShowManageAdminAccessModal(false)}
+				/>
 			)}
 		</>
 	);

@@ -81,10 +81,6 @@ const EditResidentModal = ({ resident, onClose }) => {
 			return;
 		}
 
-		console.log("societyId:", societyId);
-		console.log("resident.id:", resident?.id);
-		console.log("form:", form);
-
 		toast.promise(
 			updateResident(
 				societyId,
@@ -128,7 +124,11 @@ const EditResidentModal = ({ resident, onClose }) => {
 	};
 
 	return (
-		<div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+		<div
+			role="dialog"
+			aria-modal="true"
+			className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+		>
 			<motion.div
 				initial={{ opacity: 0, y: -30 }}
 				animate={{ opacity: 1, y: 0 }}

@@ -1,13 +1,16 @@
 import { motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
 import { Users, PlusCircle } from "lucide-react";
-import ButtonCard from "../components/ButtonCard";
-import BackButtonOrLink from "./../components/BackButtonOrLink";
-import UseHeading from "./../hooks/UseHeading";
+import ButtonCard from "@/components/ButtonCard";
+import BackButtonOrLink from "@/components/BackButtonOrLink";
+import UseHeading from "@/hooks/UseHeading";
+import { useAuth } from "@/context/AuthContext";
 
 const ManageSocietyPage = () => {
 	const location = useLocation();
 	const isBasePath = location.pathname === "/manage-society";
+
+	const { isEditAccess } = useAuth();
 
 	const heading = UseHeading();
 
@@ -16,8 +19,16 @@ const ManageSocietyPage = () => {
 		heading === "View Residents" || heading === "Update Residents";
 
 	const buttons = [
-		{ icon: Users, label: "Manage Residents", to: "manage-residents" },
-		{ icon: PlusCircle, label: "Add Transactions", to: "add-transactions" },
+		{
+			icon: Users,
+			label: "Manage Residents",
+			to: "manage-residents",
+		},
+		{
+			icon: PlusCircle,
+			label: "Add Transactions",
+			to: "add-transactions",
+		},
 	];
 
 	return (
@@ -54,6 +65,9 @@ const ManageSocietyPage = () => {
 							transition={{ duration: 0.2 }}
 						>
 							<ButtonCard
+								isDisabled={
+									btn.label === "Add Transactions" && !isEditAccess
+								}
 								icon={btn.icon}
 								label={btn.label}
 								to={btn.to}

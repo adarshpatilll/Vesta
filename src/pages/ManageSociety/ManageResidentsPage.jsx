@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
 import { Eye, Pencil, PlusCircle } from "lucide-react";
-import ButtonCard from "../../components/ButtonCard";
+import ButtonCard from "@/components/ButtonCard";
+import { useAuth } from "@/context/AuthContext";
 
 const ManageResidentsPage = () => {
 	const location = useLocation();
 	const isBasePath = location.pathname === "/manage-society/manage-residents";
+
+	const { isEditAccess } = useAuth();
 
 	const buttons = [
 		{ icon: Eye, label: "View Residents", to: "view" },
@@ -37,6 +40,11 @@ const ManageResidentsPage = () => {
 							transition={{ duration: 0.4 }}
 						>
 							<ButtonCard
+								isDisabled={
+									(btn.label === "Add Resident" ||
+										btn.label === "Update Residents") &&
+									!isEditAccess
+								}
 								icon={btn.icon}
 								label={btn.label}
 								to={btn.to}

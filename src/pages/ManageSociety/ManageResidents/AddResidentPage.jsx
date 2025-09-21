@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { addResident } from "../../../firebase/firestore/residents";
-import { useAuth } from "../../../context/AuthContext";
-import { useSociety } from "../../../context/SocietyContext";
-import { RadioButtonGroup } from "./../../../components/RadioButtonGroup";
-import { InputField } from "./../../../components/InputField";
+import { addResident } from "@/firebase/firestore/residents";
+import { useAuth } from "@/context/AuthContext";
+import { useSociety } from "@/context/SocietyContext";
+import { RadioButtonGroup } from "@/components/RadioButtonGroup";
+import { InputField } from "@/components/InputField";
 
 const AddResidentPage = () => {
 	const { societyId } = useAuth();
@@ -25,7 +25,7 @@ const AddResidentPage = () => {
 		const { name, value } = e.target;
 
 		if (name === "ownerContact" || name === "tenantContact") {
-			const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+			const val = e.target.value.replace(/\D/g, "").slice(0, 10); // only digits, max 10
 			setForm((prev) => ({ ...prev, [name]: val }));
 		} else {
 			setForm((prev) => ({ ...prev, [name]: value }));

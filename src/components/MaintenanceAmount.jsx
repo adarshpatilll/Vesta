@@ -7,7 +7,7 @@ import {
 } from "../firebase/firestore/maintenanceAmount";
 import UpdateMaintenanceAmountModal from "./UpdateMaintenanceAmountModal";
 
-const MaintenanceAmount = ({ societyId }) => {
+const MaintenanceAmount = ({ societyId, isSuperAdmin }) => {
 	const [amount, setAmount] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -18,7 +18,7 @@ const MaintenanceAmount = ({ societyId }) => {
 				const data = await getMaintenanceAmount(societyId);
 				if (data) {
 					setAmount(data);
-               setMaintenanceAmount(societyId, data); // Update context
+					setMaintenanceAmount(societyId, data); // Update context
 				}
 			} catch (err) {
 				console.error(err);
@@ -63,16 +63,19 @@ const MaintenanceAmount = ({ societyId }) => {
 					</p>
 				)}
 
-				<motion.button
-					whileTap={{ scale: 0.95 }}
-					transition={{ type: "spring", stiffness: 400, damping: 17 }}
-					onClick={() => {
-						setIsModalOpen(true);
-					}}
-					className="text-light rounded-lg border border-blue-800 bg-blue-500/10 px-2 py-1 text-xs transition-colors hover:bg-blue-600/80 sm:text-sm"
-				>
-					<span>Update Amount</span>
-				</motion.button>
+				{/* Update Button only for admins who have edit access */}
+				{isSuperAdmin && (
+					<motion.button
+						whileTap={{ scale: 0.95 }}
+						transition={{ type: "spring", stiffness: 400, damping: 17 }}
+						onClick={() => {
+							setIsModalOpen(true);
+						}}
+						className="text-light rounded-lg border border-blue-800 bg-blue-500/10 px-2 py-1 text-xs transition-colors hover:bg-blue-600/80 sm:text-sm"
+					>
+						<span>Update Amount</span>
+					</motion.button>
+				)}
 			</div>
 
 			{isModalOpen && (

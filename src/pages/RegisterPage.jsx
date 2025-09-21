@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
+import { getAdminDetails, registerAdmin } from "@/firebase/firestore/admin";
 
 const RegisterPage = () => {
 	const [name, setName] = useState("");
@@ -29,8 +30,9 @@ const RegisterPage = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState({});
 
+	const { setIsRegistration, setUser, setIsAuthenticated } = useAuth();
+
 	const navigate = useNavigate();
-	const { registerAdmin } = useAuth();
 
 	const validateForm = () => {
 		const newErrors = {};
@@ -73,6 +75,9 @@ const RegisterPage = () => {
 		setIsLoading(true);
 
 		try {
+			// Indicate that registration is in process
+			setIsRegistration(true);
+
 			// convert societyId (Shayam Kunj) to camelCase (shayam-kunj)
 			const convertedSocietyId = societyId
 				.trim()
@@ -81,33 +86,45 @@ const RegisterPage = () => {
 				.map((word) => word.toLowerCase())
 				.join("-");
 
-			// Call registerAdmin from AuthContext to create account and add admin to Firestore
-			const { isFirstAdmin } = await registerAdmin(
+			const {
+				user: newUser,
+				isFirstAdmin,
+				adminDetails,
+			} = await registerAdmin(
 				{ name, phone, flatNo, societyId: convertedSocietyId },
 				email,
 				password
 			);
 
 			// Show success toast message based on whether it's the first admin
-			if (!isFirstAdmin) {
-				// Society already exists
-				toast.warning("Account created successfully 🎉", {
-					duration: 8000,
-					description:
-						"Society already exists. You have been added as an admin to the existing society.",
-				});
-			} else {
+			if (isFirstAdmin) {
 				// First admin of the society
+				// Set user in context
+				setUser({ ...newUser, adminDetails });
+				setIsAuthenticated(true);
+
 				toast.success("Account created successfully 🎉", {
 					description:
 						"Payment cycle is set to 1st - 10th and maintenance amount is set to ₹500 by default. You can change these settings later.",
 					duration: 8000,
 				});
-			}
+				navigate("/", { replace: true });
+			} else {
+				// Society already exists
+				// User is added as an admin but not authorized yet
+				// So, do not set user in context
+				setIsAuthenticated(false);
 
-			// Redirect to home page
-			navigate("/", { replace: true });
+				toast.warning("Account created successfully 🎉", {
+					duration: 8000,
+					description:
+						"Society already exists. You have been added as an admin to the existing society. Please wait for the super admin to authorize your account before you can log in.",
+				});
+
+				navigate("/login", { replace: true });
+			}
 		} catch (error) {
+			console.log("Error registering admin:", error);
 			// Handle Firebase errors
 			if (error.code === "auth/email-already-in-use") {
 				toast.error("Email already in use");
@@ -118,6 +135,8 @@ const RegisterPage = () => {
 			}
 		} finally {
 			setIsLoading(false);
+			// Indicate that registration is complete
+			setIsRegistration(false);
 		}
 	};
 

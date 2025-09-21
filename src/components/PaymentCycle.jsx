@@ -7,7 +7,7 @@ import {
 } from "../firebase/firestore/paymentCycle";
 import UpdatePaymentCycleModal from "./UpdatePaymentCycleModal";
 
-const PaymentCycle = ({ societyId }) => {
+const PaymentCycle = ({ societyId, isSuperAdmin }) => {
 	const [cycle, setCycle] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,8 +82,8 @@ const PaymentCycle = ({ societyId }) => {
 					</p>
 				)}
 
-				{/* Update Button */}
-				{!loading && (
+				{/* Update Button only for Admins who have edit access */}
+				{!loading && isSuperAdmin && (
 					<motion.button
 						whileTap={{ scale: 0.95 }}
 						transition={{ type: "spring", stiffness: 400, damping: 17 }}

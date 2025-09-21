@@ -15,7 +15,11 @@ const ResidentSelectModal = ({ residents, selectedIds, onClose, onSave }) => {
 	};
 
 	return (
-		<div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+		<div
+			role="dialog"
+			aria-modal="true"
+			className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+		>
 			<motion.div
 				initial={{ opacity: 0, y: -30 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -36,34 +40,40 @@ const ResidentSelectModal = ({ residents, selectedIds, onClose, onSave }) => {
 				{/* List */}
 				<div className="overflow-y-auto hide-scrollbar max-h-[60vh] relative">
 					<div className="space-y-3">
-						{residents.map((res) => {
-							const isSelected = selected.has(res.id);
-							return (
-								<div
-									key={res.id}
-									onClick={() => toggleSelect(res.id)}
-									className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition ${
-										isSelected
-											? "border-yellow-500 bg-yellow-600/20 text-yellow-400"
-											: "border-neutral-700 bg-neutral-800 text-light/70"
-									}`}
-								>
-									{/* Custom Checkbox */}
+						{residents.length === 0 ? (
+							<p className="text-center text-light/50 py-6 text-sm">
+								No residents found.
+							</p>
+						) : (
+							residents.map((res) => {
+								const isSelected = selected.has(res.id);
+								return (
 									<div
-										className={`flex h-5 w-5 items-center justify-center rounded border ${
+										key={res.id}
+										onClick={() => toggleSelect(res.id)}
+										className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition ${
 											isSelected
-												? "border-yellow-500 bg-yellow-500 text-dark"
-												: "border-neutral-500"
+												? "border-yellow-500 bg-yellow-600/20 text-yellow-400"
+												: "border-neutral-700 bg-neutral-800 text-light/70"
 										}`}
 									>
-										{isSelected && <Check size={14} />}
+										{/* Custom Checkbox */}
+										<div
+											className={`flex h-5 w-5 items-center justify-center rounded border ${
+												isSelected
+													? "border-yellow-500 bg-yellow-500 text-dark"
+													: "border-neutral-500"
+											}`}
+										>
+											{isSelected && <Check size={14} />}
+										</div>
+										<span>
+											Flat {res.flatNo} - {res.ownerName}
+										</span>
 									</div>
-									<span>
-										Flat {res.flatNo} - {res.ownerName}
-									</span>
-								</div>
-							);
-						})}
+								);
+							})
+						)}
 					</div>
 				</div>
 
@@ -76,8 +86,9 @@ const ResidentSelectModal = ({ residents, selectedIds, onClose, onSave }) => {
 						Cancel
 					</button>
 					<button
+						disabled={selected.size === 0}
 						onClick={() => onSave(Array.from(selected))}
-						className="rounded-lg bg-yellow-600 px-6 py-2 text-sm text-dark font-semibold hover:bg-yellow-500"
+						className="rounded-lg bg-yellow-600 px-6 py-2 text-sm text-dark font-semibold hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-600/70"
 					>
 						Save
 					</button>
