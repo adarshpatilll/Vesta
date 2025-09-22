@@ -7,7 +7,9 @@ import {
 	getAdminDetails,
 	logoutAdmin,
 	registerAdmin,
+	getRealtimeSAEStatus,
 } from "../firebase/firestore/admin";
+import { toast } from "sonner";
 
 const AuthContext = createContext();
 
@@ -67,6 +69,35 @@ export const AuthProvider = ({ children }) => {
 
 		return () => unsubscribe();
 	}, [isRegistration]);
+
+	useEffect(() => {
+		if (user && societyId) {
+			let unsubscribe;
+
+			(async () => {
+				unsubscribe = await getRealtimeSAEStatus(
+					({ isAuthorizedBySuperAdmin, isSuperAdmin, isEditAccess }) => {
+						if (!isAuthorizedBySuperAdmin) {
+							setIsAuthenticated(false);
+							logoutAdmin();
+							toast.error(
+								"Your admin access has been revoked. Logging out."
+							);
+							return;
+						}
+						setIsSuperAdmin(isSuperAdmin ?? false);
+						setIsEditAccess(isEditAccess ?? false);
+					}
+				);
+			})();
+
+			return () => {
+				if (unsubscribe) {
+					unsubscribe();
+				}
+			};
+		}
+	}, [user, societyId]);
 
 	return (
 		<AuthContext.Provider

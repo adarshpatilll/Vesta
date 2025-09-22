@@ -1,9 +1,9 @@
 import { RouterProvider } from "react-router-dom";
-import router from "./routes/router";
 import ResponsiveToaster from "./components/ResponsiveToaster";
 import React from "react";
 import useAntiInspect from "./hooks/useAntiInspect";
 import UnderMaintenance from "./components/UnderMaintenance";
+import AppRouter from "./routes/router";
 
 const App = () => {
 	useAntiInspect();
@@ -19,11 +19,11 @@ const App = () => {
 	}
 
 	return (
-		<React.Fragment>
-			<RouterProvider router={router} />
+		<>
+			<RouterProvider router={AppRouter()} />
 
 			<ResponsiveToaster />
-		</React.Fragment>
+		</>
 	);
 };
 

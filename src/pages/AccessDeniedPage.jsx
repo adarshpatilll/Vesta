@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import errorAnimation from "@/assets/access-denied";
@@ -9,12 +9,15 @@ const AccessDeniedPage = () => {
 	const navigate = useNavigate();
 	const [counting, setCounting] = useState(5);
 	const { logoutAdmin } = useAuth();
+	const { state } = useLocation();
+
+	const isEditNavigate = state?.isEditNavigate ?? false; // Check if navigated from edit access restriction
 
 	useEffect(() => {
 		// This effect is for countdown only
 		if (counting === 0) {
-			logoutAdmin(); // Call it once when the countdown finishes
-			navigate("/login");
+			!isEditNavigate && logoutAdmin(); // Logout only if not navigated from edit access restriction
+			!isEditNavigate ? navigate("/login") : navigate("/manage-society"); // Redirect to login or manage society based on navigation source
 			return;
 		}
 
@@ -60,11 +63,14 @@ const AccessDeniedPage = () => {
 				animate={{ y: 0, opacity: 1 }}
 				transition={{ duration: 0.4, delay: 0.2 }}
 			>
-				Waiting for Super Admin approval before you can log in.
+				{isEditNavigate
+					? "You do not have the necessary edit permissions to access this page."
+					: "Waiting for Super Admin approval before you can log in."}
 			</motion.p>
 
 			<motion.button className="text-dark flex items-center gap-2 rounded-lg bg-yellow-400 px-6 py-3 font-medium">
-				Redirecting to Login in {counting}...
+				Redirecting to {isEditNavigate ? "Manage Society" : "Login"} in{" "}
+				{counting}...
 			</motion.button>
 		</motion.div>
 	);

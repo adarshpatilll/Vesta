@@ -1,4 +1,9 @@
-import { createBrowserRouter } from "react-router-dom";
+import {
+	createBrowserRouter,
+	Navigate,
+	Outlet,
+	useLocation,
+} from "react-router-dom";
 
 import PublicRoutes from "./PublicRoutes";
 import ProtectedRoutes from "./ProtectedRoutes";
@@ -28,114 +33,117 @@ import ViewResidentsPage from "../pages/ManageSociety/ManageResidents/ViewReside
 import TermsPage from "./../pages/TermsPage";
 import PrivacyPage from "./../pages/PrivacyPage";
 import AccessDeniedPage from "@/pages/AccessDeniedPage";
+import { useAuth } from "@/context/AuthContext";
 
-const PublicRoutesArray = [
-	{
-		path: "/login",
-		element: <LoginPage />,
-	},
-	{
-		path: "/register",
-		element: <RegisterPage />,
-	},
-	{
-		path: "/reset-password",
-		element: <ResetPasswordPage />,
-	},
-];
+export default function AppRouter() {
+	const PublicRoutesArray = [
+		{
+			path: "/login",
+			element: <LoginPage />,
+		},
+		{
+			path: "/register",
+			element: <RegisterPage />,
+		},
+		{
+			path: "/reset-password",
+			element: <ResetPasswordPage />,
+		},
+	];
 
-const ProtectedRoutesArray = [
-	{
-		path: "/",
-		element: <HomePage />,
-	},
-	{
-		path: "/account",
-		element: <AccountPage />,
-	},
-	{
-		path: "/manage-society",
-		element: <ManageSocietyPage />,
-		children: [
-			{
-				path: "manage-residents",
-				element: <ManageResidentsPage />,
-				children: [
-					{
-						path: "update",
-						element: <UpdateResidentsPage />,
-					},
-					{
-						path: "view",
-						element: <ViewResidentsPage />,
-					},
-					{
-						path: "add",
-						element: <AddResidentPage />,
-					},
-				],
-			},
-			{
-				path: "add-transactions",
-				element: <AddTransactionsPage />,
-			},
-		],
-	},
-];
+	const ProtectedRoutesArray = [
+		{
+			path: "/",
+			element: <HomePage />,
+		},
+		{
+			path: "/account",
+			element: <AccountPage />,
+		},
+		{
+			path: "/manage-society",
+			element: <ManageSocietyPage />,
+			children: [
+				{
+					path: "manage-residents",
+					element: <ManageResidentsPage />,
+					children: [
+						{
+							path: "update",
+							element: <UpdateResidentsPage />,
+						},
+						{
+							path: "view",
+							element: <ViewResidentsPage />,
+						},
+						{
+							path: "add",
+							element: <AddResidentPage />,
+						},
+					],
+				},
+				{
+					path: "add-transactions",
+					element: <AddTransactionsPage />,
+				},
+			],
+		},
+	];
 
-const router = createBrowserRouter([
-	// Public Routes
-	{
-		element: <PublicRoutes />,
-		children: [
-			{
-				element: <AppContent />,
-				children: PublicRoutesArray,
-			},
-		],
-	},
+	const router = createBrowserRouter([
+		// Public Routes
+		{
+			element: <PublicRoutes />,
+			children: [
+				{
+					element: <AppContent />,
+					children: PublicRoutesArray,
+				},
+			],
+		},
 
-	// Universal routes
-	{
-		path: "/new-password", // universal route (no auth wrapper)
-		element: <NewPassword />,
-	},
+		// Universal routes
+		{
+			path: "/new-password",
+			element: <NewPassword />,
+		},
 
-	{
-		path: "/terms",
-		element: <TermsPage />,
-	},
+		{
+			path: "/terms",
+			element: <TermsPage />,
+		},
 
-	{
-		path: "/privacy",
-		element: <PrivacyPage />,
-	},
-	{
-		path: "/access-denied",
-		element: <AccessDeniedPage />,
-	},
+		{
+			path: "/privacy",
+			element: <PrivacyPage />,
+		},
+		{
+			path: "/access-denied",
+			element: <AccessDeniedPage />,
+		},
 
-	// Protected Routes
-	{
-		element: <ProtectedRoutes />,
-		children: [
-			{
-				element: <Layout />,
-				children: [
-					{
-						element: <AppContent />,
-						children: ProtectedRoutesArray,
-					},
-				],
-			},
-		],
-	},
+		// Protected Routes
+		{
+			element: <ProtectedRoutes />,
+			children: [
+				{
+					element: <Layout />,
+					children: [
+						{
+							element: <AppContent />,
+							children: ProtectedRoutesArray,
+						},
+					],
+				},
+			],
+		},
 
-	// Not Found Routes
-	{
-		path: "*",
-		element: <NotFound />,
-	},
-]);
+		// Not Found Routes
+		{
+			path: "*",
+			element: <NotFound />,
+		},
+	]);
 
-export default router;
+	return router;
+}

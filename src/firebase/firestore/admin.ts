@@ -1,3 +1,4 @@
+import { Unsubscribe } from "firebase/firestore"; // for onSnapshot unsubscribe type
 import { ensureSocietyId } from "../../utils/ensureSocietyId";
 import {
 	collection,
@@ -17,6 +18,7 @@ import {
 	collectionGroup,
 	where,
 	addDoc,
+	onSnapshot,
 } from "../firebaseServices";
 import { updateBalance } from "./balance";
 import { setMaintenanceAmount } from "./maintenanceAmount";
@@ -410,6 +412,43 @@ export const giveOrRemoveEditAccess = async (
 	} catch (error) {
 		throw error;
 	}
+};
+
+/**
+ * Get real-time updates of admin status (isSuperAdmin, isAuthorizedBySuperAdmin, isEditAccess).
+ * @param callback - Callback function to handle states updates
+ * @returns Unsubscribe function to stop listening for updates
+ */
+export const getRealtimeSAEStatus = async (
+	callback: (status: {
+		isSuperAdmin: boolean;
+		isAuthorizedBySuperAdmin: boolean;
+		isEditAccess?: boolean;
+	}) => void
+): Promise<Unsubscribe> => {
+	const user = auth.currentUser;
+	if (!user) {
+		throw new Error("No authenticated user found");
+	}
+
+	const societyId = await ensureSocietyId();
+	if (!societyId) {
+		throw new Error("Society not found");
+	}
+
+	const adminRef = doc(db, "societies", societyId, "admins", user.uid);
+	const unSub: Unsubscribe = onSnapshot(adminRef, (doc) => {
+		if (doc.exists()) {
+			const data = doc.data();
+			callback({
+				isSuperAdmin: data.isSuperAdmin,
+				isAuthorizedBySuperAdmin: data.isAuthorizedBySuperAdmin,
+				isEditAccess: data.isEditAccess,
+			});
+		}
+	});
+
+	return unSub;
 };
 
 // Get all admins in a society
