@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { useState } from "react";
+import GradientHeading from "./GradientHeading";
 
 const ResidentSelectModal = ({ residents, selectedIds, onClose, onSave }) => {
 	const [selected, setSelected] = useState(new Set(selectedIds || []));
@@ -28,7 +29,8 @@ const ResidentSelectModal = ({ residents, selectedIds, onClose, onSave }) => {
 			>
 				{/* Header */}
 				<div className="flex justify-between items-center mb-4">
-					<h2 className="text-lg font-semibold">Select Residents</h2>
+					<GradientHeading content={"Select Residents"} />
+					{/* Close Button */}
 					<button
 						onClick={onClose}
 						className="text-neutral-400 hover:text-light"

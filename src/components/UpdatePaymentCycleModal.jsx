@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import DayGrid from "./DayGrid";
+import GradientHeading from "./GradientHeading";
 
 const UpdatePaymentCycleModal = ({
 	setIsModalOpen,
@@ -19,10 +20,10 @@ const UpdatePaymentCycleModal = ({
 				exit={{ opacity: 0, scale: 0.9 }}
 				className="bg-dark text-light hide-scrollbar flex flex-col gap-4 relative rounded-xl p-6 shadow-xl sm:rounded-2xl max-w-md min-w-[290px]"
 			>
-				<h2 className="text-light text-lg font-semibold">
-					Update Payment Cycle
-				</h2>
+				{/* Header */}
+				<GradientHeading content={"Update Payment Cycle"} />
 
+				{/* Body */}
 				<p className="text-light/70 text-sm">
 					Select <b>start</b> and <b>end</b> day of the month:
 				</p>

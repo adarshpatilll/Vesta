@@ -8,6 +8,7 @@ import MaintenanceHistoryModal from "./MaintenanceHistoryModal";
 import { useState } from "react";
 import getMonthKey from "../utils/getMonthKey";
 import { useAuth } from "@/context/AuthContext";
+import GradientHeading from "./GradientHeading";
 
 const ResidentCard = ({
 	filteredResidents,
@@ -126,9 +127,9 @@ const ResidentCard = ({
 								>
 									{/* Header */}
 									<h3 className="mb-3 flex items-center gap-2 justify-between">
-										<span className="text-lg font-semibold text-yellow-500">
+										<GradientHeading>
 											Flat &gt; {res.flatNo}
-										</span>
+										</GradientHeading>
 										<span
 											hidden={!showMarkMaintenance}
 											onClick={() => {

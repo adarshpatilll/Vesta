@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
 import { getAdminDetails, registerAdmin } from "@/firebase/firestore/admin";
+import Particles from "@/blocks/Particles/Particles";
 
 const RegisterPage = () => {
 	const [name, setName] = useState("");
@@ -141,9 +142,20 @@ const RegisterPage = () => {
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-neutral-950 p-6 sm:p-8 lg:p-10">
+		<div className="relative h-screen w-full bg-neutral-950 overflow-hidden">
+			<Particles
+				particleColors={["#ffffff", "#fbbf24", "#f59e0b"]} // white and yellow shades
+				particleCount={300}
+				particleSpread={10}
+				speed={0.1}
+				particleBaseSize={100}
+				moveParticlesOnHover={true}
+				alphaParticles={false}
+				disableRotation={false}
+			/>
+
 			<motion.div
-				className="bg-dark max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-xl md:max-w-2xl"
+				className="bg-dark/80 max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-lg md:max-w-xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
 				initial={{ opacity: 0, y: 50 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6, ease: "easeOut" }}
@@ -161,9 +173,9 @@ const RegisterPage = () => {
 				<Divider className={"mb-6 sm:mb-8"} />
 
 				{/* Form */}
-				<div className="max-xs:gap-3 flex flex-col gap-4 px-6 sm:gap-5 sm:px-8">
+				<div className="max-xs:gap-3 flex flex-col gap-4 px-4 sm:gap-5 sm:px-8">
 					<motion.form
-						className="max-xs:gap-3 grid sm:grid-cols-2 gap-4 sm:gap-5"
+						className="max-xs:gap-3 grid sm:grid-cols-2 gap-4 sm:gap-5 overflow-y-auto max-h-[66vh] hide-scrollbar p-1"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.3 }}
@@ -251,7 +263,7 @@ const RegisterPage = () => {
 					{/* Submit */}
 					<button
 						onClick={handleSubmit}
-						className="text-light max-xs:text-sm h-11 w-full sm:w-fit mx-auto rounded-lg bg-yellow-600 text-base font-medium shadow-md transition hover:bg-yellow-500 disabled:opacity-50 sm:px-24 mt-2"
+						className="text-light max-xs:text-sm h-11 w-[calc(100%-10px)] sm:w-fit mx-auto rounded-lg bg-yellow-600 text-base font-medium shadow-md transition hover:bg-yellow-500 disabled:opacity-50 sm:px-24 mt-2"
 						disabled={isLoading}
 					>
 						{isLoading ? "Creating account..." : "Sign up"}
@@ -300,31 +312,22 @@ const Field = ({
 				id={id}
 				type="text"
 				placeholder={`${
-					example ? `Eg: ${example}` : `Enter your ${label.toLowerCase()}`
+					!error
+						? example
+							? `Eg: ${example}`
+							: `Enter your ${label.toLowerCase()}`
+						: `${error}`
 				}`}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				maxLength={maxLength}
-				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800 pr-3 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
+				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
 					error
 						? "border-red-500 focus:ring-red-400"
 						: "border-neutral-700"
-				}`}
+				} ${error ? "placeholder-red-400" : ""}`}
 			/>
 		</div>
-		<AnimatePresence>
-			{error && (
-				<motion.p
-					initial={{ opacity: 0, y: -5 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -5 }}
-					transition={{ duration: 0.25 }}
-					className="mt-1 text-xs text-red-400"
-				>
-					{error}
-				</motion.p>
-			)}
-		</AnimatePresence>
 	</div>
 );
 
@@ -339,14 +342,14 @@ const PasswordField = ({ id, label, value, onChange, error, show, toggle }) => (
 			<input
 				id={id}
 				type={show ? "text" : "password"}
-				placeholder={`Eg: hello@world`}
+				placeholder={`${error ? error : `Eg: hello@world`}`}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
-				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800 pr-10 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
+				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-10 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
 					error
 						? "border-red-500 focus:ring-red-400"
 						: "border-neutral-700"
-				}`}
+				} ${error ? "placeholder-red-400" : ""}`}
 			/>
 			<button
 				type="button"
@@ -360,19 +363,6 @@ const PasswordField = ({ id, label, value, onChange, error, show, toggle }) => (
 				)}
 			</button>
 		</div>
-		<AnimatePresence>
-			{error && (
-				<motion.p
-					initial={{ opacity: 0, y: -5 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -5 }}
-					transition={{ duration: 0.25 }}
-					className="mt-1 text-xs text-red-400"
-				>
-					{error}
-				</motion.p>
-			)}
-		</AnimatePresence>
 	</div>
 );
 

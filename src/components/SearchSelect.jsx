@@ -41,7 +41,7 @@ export default function SearchSelect({
 
 			{/* Input Box */}
 			<div
-				className={`mt-1 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors ${
+				className={`mt-1 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 transition-colors ${
 					open
 						? "border-light border bg-neutral-800" // active state
 						: "border border-neutral-700 bg-neutral-800"
@@ -52,7 +52,7 @@ export default function SearchSelect({
 				}}
 			>
 				<span
-					className={`flex-1 truncate ${
+					className={`flex-1 truncate text-sm ${
 						value ? "text-light" : "text-light/50"
 					}`}
 				>
@@ -76,7 +76,7 @@ export default function SearchSelect({
 				<motion.div
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg"
+					className="absolute top-full text-sm left-0 z-10 mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg"
 				>
 					{/* Search */}
 					<input
@@ -144,7 +144,7 @@ export default function SearchSelect({
 										</div>
 
 										{/* Email / Secondary text */}
-										<span className="text-light/60 text-sm truncate">
+										<span className="text-light/60 text-sm truncate font-light ">
 											({opt.label.split("-")[1]}){" "}
 										</span>
 									</div>

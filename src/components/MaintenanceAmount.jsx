@@ -47,6 +47,7 @@ const MaintenanceAmount = ({ societyId, isSuperAdmin }) => {
 
 	return (
 		<motion.div className="flex flex-col gap-3">
+			{/* Header */}
 			<h2 className="text-light text-base font-semibold md:text-lg">
 				Maintenance Amount
 			</h2>

@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import Divider from "../components/Divider";
-import { useAuth } from "../context/AuthContext";
 import { loginAdmin } from "@/firebase/firestore/admin";
+import Particles from "@/blocks/Particles/Particles";
 
 const LoginPage = () => {
 	const [email, setEmail] = useState("");
@@ -73,9 +73,20 @@ const LoginPage = () => {
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-neutral-950 p-6 sm:p-8 lg:p-10">
+		<div className="relative h-screen w-full bg-neutral-950 overflow-hidden">
+			<Particles
+				particleColors={["#ffffff", "#fbbf24", "#f59e0b"]} // white and yellow shades
+				particleCount={300}
+				particleSpread={10}
+				speed={0.1}
+				particleBaseSize={100}
+				moveParticlesOnHover={true}
+				alphaParticles={false}
+				disableRotation={false}
+			/>
+
 			<motion.div
-				className="bg-dark max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-md md:max-w-lg"
+				className="bg-dark/80 max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-md md:max-w-lg fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
 				initial={{ opacity: 0, y: 50 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6, ease: "easeOut" }}
@@ -118,7 +129,7 @@ const LoginPage = () => {
 									placeholder="Enter your email"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
-									className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800 pr-3 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
+									className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
 										errors.email
 											? "border-red-500 focus:ring-red-400"
 											: "border-neutral-700"
@@ -158,7 +169,7 @@ const LoginPage = () => {
 									placeholder="Enter your password"
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
-									className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800 pr-10 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
+									className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-10 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
 										errors.password
 											? "border-red-500 focus:ring-red-400"
 											: "border-neutral-700"
@@ -206,7 +217,7 @@ const LoginPage = () => {
 						{/* Submit */}
 						<button
 							type="submit"
-							className="text-light max-xs:text-sm h-11 w-full rounded-lg bg-yellow-600 text-base font-medium shadow-md transition hover:bg-yellow-500 disabled:opacity-50"
+							className="text-dark font-semibold max-xs:text-sm h-11 w-full rounded-lg bg-yellow-600 text-base shadow-md transition hover:bg-yellow-500 disabled:opacity-50"
 							disabled={isLoading}
 						>
 							{isLoading ? "Signing in..." : "Sign in"}

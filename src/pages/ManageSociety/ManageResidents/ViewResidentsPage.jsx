@@ -9,6 +9,7 @@ import { searchFilter } from "../../../utils/searchFilters";
 import getMonthKey from "../../../utils/getMonthKey";
 import MonthSelector from "../../../components/MonthSelector";
 import SearchBox from "../../../components/SearchBox";
+import GradientHeading from "@/components/GradientHeading";
 
 const ViewResidentsPage = () => {
 	const [query, setQuery] = useState("");
@@ -65,7 +66,7 @@ const ViewResidentsPage = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.3 }}
 				>
-					<h2 className="text-lg font-semibold">View Residents</h2>
+					<GradientHeading content="View Residents" />
 					<BackButton isLink />
 				</motion.div>
 

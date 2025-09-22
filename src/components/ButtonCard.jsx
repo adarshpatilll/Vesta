@@ -15,7 +15,7 @@ const ButtonCard = ({ icon: Icon, label, onClick, to, isDisabled }) => {
 		) : (
 			<Link to={to} className={`${baseClasses} ${enabledClasses}`}>
 				<Icon size={28} />
-				<span className="font-medium">{label}</span>
+				<span className={`font-medium text-light`}>{label}</span>
 			</Link>
 		);
 	}

@@ -15,6 +15,7 @@ import {
 } from "../firebase/firestore/admin";
 import { IoLogOut } from "react-icons/io5";
 import SkeletonTransaction from "./SkeletonTransaction";
+import GradientHeading from "./GradientHeading";
 
 const ranges = [
 	{ value: "currentMonth", label: "Current Month" },
@@ -189,11 +190,13 @@ const ExportDataPage = ({ onClose, exportType }) => {
 		>
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<h2 className="text-lg font-semibold">
-					{exportType === "excel"
-						? "Export Society Data"
-						: "Sync Society Data"}
-				</h2>
+				<GradientHeading
+					content={
+						exportType === "excel"
+							? "Export Society Data"
+							: "Sync Society Data"
+					}
+				/>
 
 				{exportType === "sheets" && token ? (
 					<button
@@ -218,7 +221,8 @@ const ExportDataPage = ({ onClose, exportType }) => {
 			) : null}
 
 			{/* Range Selector */}
-			{!fetchLoading && (exportType === "excel" || (exportType === "sheets" && token)) ? (
+			{!fetchLoading &&
+			(exportType === "excel" || (exportType === "sheets" && token)) ? (
 				<div className="flex flex-col gap-2">
 					<p className="text-sm text-neutral-400">Select Range</p>
 					<div className="flex items-center justify-between gap-4 text-sm bg-neutral-800 rounded-lg border border-neutral-700 px-3 py-2">

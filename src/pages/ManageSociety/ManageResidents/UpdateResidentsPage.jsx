@@ -11,6 +11,7 @@ import CircularLoader from "../../../components/CircularLoader";
 import { deleteResident } from "../../../firebase/firestore/residents.js";
 import { toast } from "sonner";
 import SearchBox from "../../../components/SearchBox.jsx";
+import GradientHeading from "@/components/GradientHeading";
 
 const UpdateResidentsPage = () => {
 	const [query, setQuery] = useState("");
@@ -63,7 +64,7 @@ const UpdateResidentsPage = () => {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.3 }}
 						>
-							<h2 className="text-lg font-semibold">Update Residents</h2>
+							<GradientHeading content="Update Residents" />
 							<BackButton isLink />
 						</motion.div>
 

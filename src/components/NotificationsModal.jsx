@@ -5,22 +5,17 @@ import { deleteNotification } from "../firebase/firestore/notifications";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import GradientHeading from "./GradientHeading";
 
-export default function NotificationsModal({
-	open,
-	onClose,
-}: {
-	open: boolean;
-	onClose: () => void;
-}) {
+export default function NotificationsModal({ open, onClose }) {
 	const { notifications, societyId, setNotifications } = useSociety();
 
 	if (!open) return null;
 
-	const handleDelete = async (id: string) => {
+	const handleDelete = async (id) => {
 		try {
 			await deleteNotification(societyId, id);
-			setNotifications((prev: any[]) => prev.filter((n) => n.id !== id));
+			setNotifications((prev) => prev.filter((n) => n.id !== id));
 		} catch (err) {
 			console.error(err);
 			toast.error("Failed to delete notification");
@@ -29,7 +24,7 @@ export default function NotificationsModal({
 
 	// Close on ESC key
 	useEffect(() => {
-		const handleEsc = (e: KeyboardEvent) => {
+		const handleEsc = (e) => {
 			if (e.key === "Escape") {
 				onClose();
 			}
@@ -55,9 +50,7 @@ export default function NotificationsModal({
 					>
 						{/* Header */}
 						<div className="flex items-center justify-between mb-4">
-							<h3 className="text-lg font-semibold text-light">
-								Notifications
-							</h3>
+							<GradientHeading content="Notifications" />
 							<button
 								onClick={onClose}
 								className="text-sm text-neutral-400 hover:text-neutral-200 transition"
@@ -74,7 +67,7 @@ export default function NotificationsModal({
 								</div>
 							)}
 
-							{notifications.map((n: any) => (
+							{notifications.map((n) => (
 								<motion.div
 									key={n.id}
 									initial={{ opacity: 0, y: 10 }}

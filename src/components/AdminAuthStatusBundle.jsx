@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import SkeletonTransaction from "./SkeletonTransaction";
 import SearchSelect from "./SearchSelect";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint, PenToolIcon, PersonStanding } from "lucide-react";
 import AuthorizeOrUnauthorizeAdminModal from "./AuthorizeOrUnauthorizeAdminModal";
 import SurrenderSuperAdminModal from "./SurrenderSuperAdminModal";
 import AdminEditAccessModal from "./AdminEditAccessModal";
@@ -34,7 +34,7 @@ const AdminAuthStatusBundle = ({
 				transition={{ duration: 0.5, delay: 0.1 }}
 			>
 				<div className="flex flex-col gap-3">
-					<h3 className="text-light text-base font-semibold md:text-lg">
+					<h3 className="text-light text-sm font-semibold md:text-base">
 						Authorize or Unauthorize Admin
 					</h3>
 
@@ -61,11 +61,11 @@ const AdminAuthStatusBundle = ({
 					<motion.button
 						onClick={() => setShowAuthorizeModal(true)}
 						disabled={!selectedAdmin}
-						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition ${
+						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition text-sm ${
 							selectedAdmin ? "hover:bg-yellow-700" : ""
-						} disabled:cursor-not-allowed disabled:opacity-50`}
+						} disabled:cursor-not-allowed disabled:opacity-70`}
 					>
-						<Fingerprint className="h-5 w-5" />{" "}
+						<Fingerprint size={16} />{" "}
 						{selectedAdmin
 							? selectedAdmin?.isAuthorizedBySuperAdmin
 								? "Unauthorize Admin"
@@ -83,7 +83,7 @@ const AdminAuthStatusBundle = ({
 				className="mt-5 md:mt-6"
 			>
 				<div className="flex flex-col gap-3">
-					<h3 className="text-light text-base font-semibold md:text-lg">
+					<h3 className="text-light text-sm font-semibold md:text-base">
 						Give or Remove Edit Access
 					</h3>
 
@@ -116,10 +116,11 @@ const AdminAuthStatusBundle = ({
 					<motion.button
 						onClick={() => setShowEditAccessModal(true)}
 						disabled={!selectedAdminForEditAccess}
-						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition ${
+						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition text-sm ${
 							selectedAdminForEditAccess ? "hover:bg-yellow-700" : ""
-						} disabled:cursor-not-allowed disabled:opacity-50`}
+						} disabled:cursor-not-allowed disabled:opacity-70`}
 					>
+                  <PenToolIcon size={16} />{" "}
 						{selectedAdminForEditAccess
 							? selectedAdminForEditAccess?.isEditAccess
 								? "Remove Edit Access"
@@ -137,7 +138,7 @@ const AdminAuthStatusBundle = ({
 				className="mt-5 md:mt-6"
 			>
 				<div className="flex flex-col gap-3">
-					<h3 className="text-light text-base font-semibold md:text-lg">
+					<h3 className="text-light text-sm font-semibold md:text-base">
 						Surrender Super Admin Access
 					</h3>
 
@@ -168,10 +169,11 @@ const AdminAuthStatusBundle = ({
 					<motion.button
 						onClick={() => setShowSurrenderModal(true)}
 						disabled={!selectedAdminForSurrender}
-						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition ${
+						className={`text-dark flex items-center justify-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 transition text-sm ${
 							selectedAdminForSurrender ? "hover:bg-yellow-700" : ""
-						} disabled:cursor-not-allowed disabled:opacity-50`}
+						} disabled:cursor-not-allowed disabled:opacity-70`}
 					>
+                  <PersonStanding size={16} />
 						Surrender Now
 					</motion.button>
 				</div>

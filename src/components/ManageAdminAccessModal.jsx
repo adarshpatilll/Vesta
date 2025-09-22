@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
 import AdminAuthStatusBundle from "./AdminAuthStatusBundle";
+import GradientHeading from "./GradientHeading";
 
 const ManageAdminAccessModal = ({
 	allAdmins,
@@ -20,11 +21,11 @@ const ManageAdminAccessModal = ({
 				initial={{ opacity: 0, y: -30 }}
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -30 }}
-				className="bg-dark text-light max-h-[80vh] w-[90%] max-w-lg rounded-xl p-6"
+				className="bg-dark text-light max-h-[80vh] w-[90%] max-w-sm rounded-xl p-6 pb-8"
 			>
 				{/* Header */}
 				<div className="flex justify-between items-center mb-4">
-					<h2 className="text-lg font-semibold">Select Residents</h2>
+					<GradientHeading content="Manage Admin Access" />
 					<button
 						onClick={onClose}
 						className="text-neutral-400 hover:text-light"

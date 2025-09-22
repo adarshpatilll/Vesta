@@ -5,6 +5,7 @@ import ButtonCard from "@/components/ButtonCard";
 import BackButtonOrLink from "@/components/BackButtonOrLink";
 import UseHeading from "@/hooks/UseHeading";
 import { useAuth } from "@/context/AuthContext";
+import GradientHeading from "@/components/GradientHeading";
 
 const ManageSocietyPage = () => {
 	const location = useLocation();
@@ -34,13 +35,12 @@ const ManageSocietyPage = () => {
 	return (
 		<section className="mx-auto max-w-5xl">
 			{/* Dynamic Header */}
-			<div
-				hidden={showHeader}
-				className="w-full flex items-center justify-between px-4"
-			>
-				<h1 className="text-lg font-semibold">{heading}</h1>
-				<BackButtonOrLink isLink />
-			</div>
+			{!showHeader && (
+				<div className="w-full flex items-center justify-between px-4">
+					<GradientHeading>{heading}</GradientHeading>
+					<BackButtonOrLink isLink />
+				</div>
+			)}
 
 			{/* Buttons */}
 			{isBasePath ? (
