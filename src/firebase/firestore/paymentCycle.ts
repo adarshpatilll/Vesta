@@ -73,7 +73,7 @@ export async function markMaintenancePaid(
 
 		await updateDoc(residentRef, {
 			[`maintenance.${monthKey}`]:
-				action === "paid" ? "paid" : deleteField(),
+				action === "paid" ? "paid" : "unpaid",
 			updatedAt: new Date(),
 		});
 

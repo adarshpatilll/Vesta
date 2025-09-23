@@ -32,12 +32,12 @@ const ResidentCard = ({
 							prev.map((r) =>
 								r.id === resident.id
 									? {
-											...r,
-											maintenance: {
-												...r.maintenance,
-												[monthKey]: "paid",
-											},
-									  }
+										...r,
+										maintenance: {
+											...r.maintenance,
+											[monthKey]: "paid",
+										},
+									}
 									: r
 							)
 						);
@@ -69,12 +69,12 @@ const ResidentCard = ({
 							prev.map((r) =>
 								r.id === resident.id
 									? {
-											...r,
-											maintenance: {
-												...r.maintenance,
-												[monthKey]: "unpaid",
-											},
-									  }
+										...r,
+										maintenance: {
+											...r.maintenance,
+											[monthKey]: "unpaid",
+										},
+									}
 									: r
 							)
 						);
@@ -112,13 +112,12 @@ const ResidentCard = ({
 							return (
 								<motion.div
 									key={res.id}
-									className={`relative rounded-2xl border bg-neutral-900/80 p-5 shadow-lg backdrop-blur-xl transition-all duration-300 ${
-										showMarkMaintenance
-											? isPaid
-												? "border-green-500/60"
-												: "border-red-500/60"
-											: "border-yellow-500/60"
-									}`}
+									className={`relative rounded-2xl border bg-neutral-900/80 p-5 shadow-lg backdrop-blur-xl transition-all duration-300 ${showMarkMaintenance
+										? isPaid
+											? "border-green-500/60"
+											: "border-red-500/60"
+										: "border-yellow-500/60"
+										}`}
 									variants={{
 										hidden: { opacity: 0 },
 										visible: { opacity: 1 },
@@ -144,20 +143,20 @@ const ResidentCard = ({
 
 									{/* Resident Details */}
 									<div className="grid grid-cols-2 gap-2 text-sm">
-										<span className="text-gray-400">Owner:</span>
+										<span className="text-gray-400">Owner Name:</span>
 										<span>{res.ownerName}</span>
 
-										<span className="text-gray-400">Contact:</span>
+										<span className="text-gray-400">Owner Contact:</span>
 										<span>{res.ownerContact}</span>
 
 										{res.type === "tenant" && (
 											<>
 												<span className="text-gray-400">
-													Tenant:
+													Tenant Name:
 												</span>
 												{res.tenantName}
 												<span className="text-gray-400">
-													Contact:
+													Tenant Contact:
 												</span>
 												{res.tenantContact}
 											</>
