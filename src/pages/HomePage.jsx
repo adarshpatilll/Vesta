@@ -7,9 +7,11 @@ import { getTransactions } from "../firebase/firestore/transactions";
 import SkeletonTransaction from "../components/SkeletonTransaction";
 import dayjs from "dayjs";
 import TransactionList from "../components/TransactionList";
+import { useSociety } from "@/context/SocietyContext";
 
 const HomePage = () => {
 	const { societyId } = useAuth();
+	const { setTransactions: setContextTransactions } = useSociety();
 	const [monthKey, setMonthKey] = useState(dayjs().format("YYYY-MM"));
 	const [transactions, setTransactions] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -48,6 +50,7 @@ const HomePage = () => {
 			try {
 				const tx = await getTransactions(societyId, monthKey);
 				setTransactions(tx);
+				setContextTransactions(tx); // update context
 			} catch (err) {
 				console.error(err);
 			} finally {

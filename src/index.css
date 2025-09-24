@@ -14,6 +14,7 @@ body {
 	--color-accent: #efb100;
 	--color-accent-hover: #d08700;
 
+	--breakpoint-xxs: 360px;
 	--breakpoint-xs: 480px;
 }
 

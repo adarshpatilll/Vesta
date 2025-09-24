@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Eye,
 	EyeOff,
@@ -14,7 +14,10 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
-import { getAdminDetails, registerAdmin } from "@/firebase/firestore/admin";
+import {
+	getAllPublicSocieties,
+	registerAdmin,
+} from "@/firebase/firestore/admin";
 import Particles from "@/blocks/Particles/Particles";
 
 const RegisterPage = () => {
@@ -31,9 +34,25 @@ const RegisterPage = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState({});
 
+	const [publicSocieties, setPublicSocieties] = useState([]);
+
 	const { setIsRegistration, setUser, setIsAuthenticated } = useAuth();
 
 	const navigate = useNavigate();
+
+	// Fetch all All Public Societies on component mount
+	useEffect(() => {
+		const fetchPublicSocieties = async () => {
+			try {
+				const societies = await getAllPublicSocieties();
+				setPublicSocieties(societies);
+			} catch (error) {
+				console.error("Error fetching public societies:", error);
+			}
+		};
+
+		fetchPublicSocieties();
+	}, []);
 
 	const validateForm = () => {
 		const newErrors = {};
@@ -56,11 +75,11 @@ const RegisterPage = () => {
 		if (!password) {
 			newErrors.password = "Password is required";
 		} else if (password.length < 6) {
-			newErrors.password = "Password must be at least 6 characters";
+			newErrors.password = "Min 6 characters required";
 		}
 
 		if (password !== confirmPassword) {
-			newErrors.confirmPassword = "Passwords do not match";
+			newErrors.confirmPassword = "Passwords mismatch";
 		}
 
 		setErrors(newErrors);
@@ -224,6 +243,7 @@ const RegisterPage = () => {
 							value={societyId}
 							onChange={setSocietyId}
 							error={errors.societyId}
+							publicSocieties={publicSocieties}
 						/>
 
 						{/* Email */}
@@ -301,55 +321,112 @@ const Field = ({
 	example,
 	maxLength,
 	wrapperClassName,
-}) => (
-	<div className={` ${wrapperClassName}`}>
-		<label htmlFor={id} className="text-light mb-1 block text-sm font-medium">
-			{label}
-		</label>
-		<div className="relative">
-			<span className="absolute top-3.5 left-3">{icon}</span>
-			<input
-				id={id}
-				type="text"
-				placeholder={`${
-					!error
-						? example
+	publicSocieties = [],
+}) => {
+	const [isDuplicateSociety, setIsDuplicateSociety] = useState(false);
+
+	const handleOnChange = (e) => {
+		if (id === "societyId") {
+			const inputSocietyId = e.target.value;
+
+			if (inputSocietyId.length > 0) {
+				const isDuplicate = publicSocieties.some(
+					(society) =>
+						society.name.toLowerCase() ===
+						inputSocietyId.trim().replace(/\s+/g, "-").toLowerCase()
+				);
+				setIsDuplicateSociety(isDuplicate);
+
+				if (isDuplicate) {
+					toast.warning("Society already exists!", {
+						description:
+							"Since a society with this name already exists, you will be added as an admin to the existing society.",
+					});
+				}
+			}
+
+			onChange(inputSocietyId);
+		} else {
+			onChange(e.target.value);
+		}
+	};
+
+	return (
+		<div className={` ${wrapperClassName}`}>
+			<label
+				htmlFor={id}
+				className="text-light mb-1 text-sm font-medium flex items-center justify-between gap-2"
+			>
+				{label}
+				<AnimatePresence>
+					{error && (
+						<motion.p
+							initial={{ opacity: 0, y: -5 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -5 }}
+							transition={{ duration: 0.25 }}
+							className="text-xs font-normal text-red-400"
+						>
+							{error}
+						</motion.p>
+					)}
+				</AnimatePresence>
+			</label>
+			<div className="relative">
+				<span className="absolute top-3.5 left-3">{icon}</span>
+				<input
+					id={id}
+					type="text"
+					placeholder={`${
+						example
 							? `Eg: ${example}`
 							: `Enter your ${label.toLowerCase()}`
-						: `${error}`
-				}`}
-				value={value}
-				onChange={(e) => onChange(e.target.value)}
-				maxLength={maxLength}
-				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
-					error
-						? "border-red-500 focus:ring-red-400"
-						: "border-neutral-700"
-				} ${error ? "placeholder-red-400" : ""}`}
-			/>
+					}`}
+					value={value}
+					onChange={handleOnChange}
+					maxLength={maxLength}
+					className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${
+						error ? "border-red-500" : "border-neutral-700"
+					}`}
+				/>
+			</div>
 		</div>
-	</div>
-);
+	);
+};
 
 // 🔹 Password Input Field
 const PasswordField = ({ id, label, value, onChange, error, show, toggle }) => (
 	<div>
-		<label htmlFor={id} className="text-light mb-1 block text-sm font-medium">
+		<label
+			htmlFor={id}
+			className="text-light mb-1 text-sm font-medium flex items-center justify-between gap-2"
+		>
 			{label}
+			<AnimatePresence>
+				{error && (
+					<motion.p
+						initial={{ opacity: 0, y: -5 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -5 }}
+						transition={{ duration: 0.25 }}
+						className="text-xs text-red-400 font-normal"
+					>
+						{error}
+					</motion.p>
+				)}
+			</AnimatePresence>
 		</label>
 		<div className="relative">
 			<Lock className="absolute left-3 top-3.5 h-4 w-4 text-light/40" />
 			<input
 				id={id}
 				type={show ? "text" : "password"}
-				placeholder={`${error ? error : `Eg: hello@world`}`}
+				placeholder={`Eg: hello@world`}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
-				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-10 pl-10 focus:ring focus:ring-yellow-300 focus:outline-none ${
-					error
-						? "border-red-500 focus:ring-red-400"
-						: "border-neutral-700"
-				} ${error ? "placeholder-red-400" : ""}`}
+				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${
+					error ? "border-red-500" : "border-neutral-700"
+				}`}
 			/>
 			<button
 				type="button"

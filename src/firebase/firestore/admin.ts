@@ -90,12 +90,10 @@ export const registerAdmin = async (
 		);
 		const user = userCredential.user;
 
+		const socId = data.societyId.trim().replace(/\s+/g, "-").toLowerCase(); // Firestore-safe ID conversion: Shyam Kunj  -> shyam-kunj
+
 		// 2️⃣ Convert societyId to Firestore-safe ID if needed
-		const societyRef = doc(
-			db,
-			"societies",
-			data.societyId.trim().replace(/\s+/g, "-").toLowerCase() // Firestore-safe ID conversion: Shyam Kunj  -> shyam-kunj
-		);
+		const societyRef = doc(db, "societies", socId);
 
 		// 3️⃣ Check if society exists
 		const societySnap = await getDoc(societyRef);
@@ -114,12 +112,22 @@ export const registerAdmin = async (
 			});
 
 			// Set defaults for first admin
-			await setPaymentCycle(data.societyId, 1, 10);
-			await setMaintenanceAmount(data.societyId, 500);
-			await updateBalance(data.societyId, 0, "initial");
+			await setPaymentCycle(socId, 1, 10);
+			await setMaintenanceAmount(socId, 500);
+			await updateBalance(socId, 0, "initial");
 		}
 
-		// 5️⃣ Add admin to society admins collection
+		// 5️⃣ Also create a public collection for society names to avoid duplicate names in future
+		if (isFirstAdmin) {
+			const publicSocietyRef = doc(db, "publicSocieties", socId);
+			await setDoc(publicSocietyRef, {
+				name: data.societyId,
+				createdAt: Timestamp.now(),
+				createdBy: { name: data.name, email },
+			});
+		}
+
+		// 6️⃣ Add admin to society admins collection
 		const adminRef = doc(collection(societyRef, "admins"), user.uid);
 		await setDoc(adminRef, {
 			id: user.uid,
@@ -127,7 +135,7 @@ export const registerAdmin = async (
 			email,
 			phone: data.phone,
 			flatNo: data.flatNo,
-			societyId: data.societyId,
+			societyId: socId,
 			googleSheetToken: null,
 			isSuperAdmin: isFirstAdmin,
 			isAuthorizedBySuperAdmin: isFirstAdmin,
@@ -135,7 +143,7 @@ export const registerAdmin = async (
 			createdAt: Timestamp.now(),
 		});
 
-		// Also return data needed for context so that we don't have to fetch again
+		// 7️⃣ Also return data needed for context so that we don't have to fetch again
 		return {
 			user: user as any,
 			isFirstAdmin: isFirstAdmin as boolean,
@@ -145,7 +153,7 @@ export const registerAdmin = async (
 				email,
 				phone: data.phone,
 				flatNo: data.flatNo,
-				societyId: data.societyId,
+				societyId: socId,
 				googleSheetToken: null,
 				isSuperAdmin: isFirstAdmin,
 				isAuthorizedBySuperAdmin: isFirstAdmin,
@@ -480,6 +488,22 @@ export const getAllAdmins = async (societyId: string) => {
 export const logoutAdmin = async () => {
 	try {
 		await signOut(auth);
+	} catch (error) {
+		throw error;
+	}
+};
+
+// Get all societies name which are publicly available
+interface IPublicSociety {
+	createdAt: Timestamp;
+	createdBy: { name: string; email: string };
+	name: string;
+}
+export const getAllPublicSocieties = async (): Promise<IPublicSociety[]> => {
+	try {
+		const publicSocietiesRef = collection(db, "publicSocieties");
+		const snap = await getDocs(publicSocietiesRef);
+		return snap.docs.map((doc) => doc.data() as IPublicSociety);
 	} catch (error) {
 		throw error;
 	}

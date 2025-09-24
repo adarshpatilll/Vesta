@@ -10,15 +10,21 @@ import { motion } from "framer-motion";
 import UpdateProfileModal from "@/components/UpdateProfileModal";
 import { getAllAdmins } from "@/firebase/firestore/admin";
 import ManageAdminAccessModal from "@/components/ManageAdminAccessModal";
+import ExcelImporter from "@/components/ExcelImporter";
+import { downloadSampleExcel } from "@/utils/downloadSampleExcel";
+import { useSociety } from "@/context/SocietyContext";
 
 const AccountPage = () => {
-	const { user, isSuperAdmin, setUser, setIsSuperAdmin } = useAuth();
+	const { user, isSuperAdmin, setUser, setIsSuperAdmin, societyId } =
+		useAuth();
+	const { residents, transactions } = useSociety();
 
 	const profile = user?.adminDetails || null;
 	const [showUpdateProfileModal, setShowUpdateProfileModal] = useState(false);
 
 	const [showExportModal, setShowExportModal] = useState(false);
 	const [exportType, setExportType] = useState(""); // "excel" or "sheets"
+	const [showImportModal, setShowImportModal] = useState(false);
 
 	const [allAdmins, setAllAdmins] = useState([]);
 	const [loadingAdmins, setLoadingAdmins] = useState(false);
@@ -197,11 +203,48 @@ const AccountPage = () => {
 
 					<Divider className="my-5 md:my-6" />
 
+					{/* Import Data */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.8 }}
+					>
+						<div className="flex flex-col gap-3">
+							<h3 className="text-light text-base font-semibold md:text-lg">
+								Import Society Data
+							</h3>
+
+							<div className="flex flex-col items-center justify-between gap-2 rounded-lg border border-neutral-700 px-3 py-2 sm:flex-row">
+								<span className="text-light/70 text-sm">
+									Click on button to upload excel file.
+								</span>
+								<div className="flex gap-3 max-xxs:flex-col flex-row">
+									<button
+										className="rounded-lg bg-green-700/30 border border-green-700 px-3 py-1 text-light hover:bg-green-600 text-xs sm:text-sm transition truncate"
+										onClick={downloadSampleExcel}
+									>
+										<span>Download Sample</span>
+									</button>
+									<button
+										disabled={
+											residents.length > 0 || transactions.length > 0
+										}
+										className="rounded-lg bg-green-700/30 border border-green-700 px-3 py-1 text-light hover:bg-green-600 text-xs sm:text-sm transition truncate disabled:bg-red-700/30 disabled:border-red-700  disabled:cursor-not-allowed disabled:text-light/60"
+										onClick={() => setShowImportModal(true)}
+									>
+										<span>Import Now</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					</motion.div>
+
 					{/* Export Data */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.8 }}
+						className="mt-5 md:mt-6"
 					>
 						<div className="flex flex-col gap-3">
 							<h3 className="text-light text-base font-semibold md:text-lg">
@@ -322,11 +365,24 @@ const AccountPage = () => {
 				/>
 			)}
 
+			{showImportModal && (
+				<div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-10">
+					<ExcelImporter
+						onImport={() => {
+							setShowImportModal(false);
+						}}
+						societyId={societyId}
+						acceptSheets={true}
+						onClose={() => setShowImportModal(false)}
+					/>
+				</div>
+			)}
+
 			{/* Manage Admin Access Modal */}
 			{showManageAdminAccessModal && (
 				<ManageAdminAccessModal
 					allAdmins={allAdmins}
-               setAllAdmins={setAllAdmins}
+					setAllAdmins={setAllAdmins}
 					loadingAdmins={loadingAdmins}
 					setUser={setUser}
 					setIsSuperAdmin={setIsSuperAdmin}

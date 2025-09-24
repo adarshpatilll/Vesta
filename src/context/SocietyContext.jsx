@@ -16,6 +16,7 @@ export const SocietyProvider = ({ children }) => {
 	const { user, societyId } = useAuth();
 
 	const [residents, setResidents] = useState([]);
+	const [transactions, setTransactions] = useState([]);
 	const [notifications, setNotifications] = useState([]);
 	const [balance, setBalance] = useState(null);
 	const [maintenanceAmount, setMaintenanceAmount] = useState(null);
@@ -94,12 +95,14 @@ export const SocietyProvider = ({ children }) => {
 				balance,
 				maintenanceAmount,
 				paymentCycle,
+				transactions,
 
 				setResidents,
 				setNotifications,
 				setBalance,
 				setMaintenanceAmount,
 				setPaymentCycle,
+				setTransactions,
 
 				markMaintenancePaid,
 				autoMarkUnpaidResidents,
