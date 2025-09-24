@@ -18,7 +18,6 @@ import {
 } from "./transactions";
 import { getMaintenanceAmount } from "./maintenanceAmount";
 import { getResidentById } from "./residents";
-import { deleteField } from "firebase/firestore";
 
 // Set payment cycle, e.g., 1-10
 export async function setPaymentCycle(
