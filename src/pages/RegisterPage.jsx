@@ -174,7 +174,7 @@ const RegisterPage = () => {
 			/>
 
 			<motion.div
-				className="bg-dark/80 max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-lg md:max-w-xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+				className="bg-dark/80 max-xs:max-w-xs w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 shadow-md shadow-neutral-900 sm:max-w-xl md:max-w-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
 				initial={{ opacity: 0, y: 50 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6, ease: "easeOut" }}
@@ -377,17 +377,15 @@ const Field = ({
 				<input
 					id={id}
 					type="text"
-					placeholder={`${
-						example
+					placeholder={`${example
 							? `Eg: ${example}`
 							: `Enter your ${label.toLowerCase()}`
-					}`}
+						}`}
 					value={value}
 					onChange={handleOnChange}
 					maxLength={maxLength}
-					className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${
-						error ? "border-red-500" : "border-neutral-700"
-					}`}
+					className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${error ? "border-red-500" : "border-neutral-700"
+						}`}
 				/>
 			</div>
 		</div>
@@ -424,9 +422,8 @@ const PasswordField = ({ id, label, value, onChange, error, show, toggle }) => (
 				placeholder={`Eg: hello@world`}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
-				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${
-					error ? "border-red-500" : "border-neutral-700"
-				}`}
+				className={`text-light max-xs:text-sm placeholder-light/35 h-11 w-full rounded-lg border bg-neutral-800/70 pr-3 pl-10 focus:border focus:border-yellow-300 focus:outline-none ${error ? "border-red-500" : "border-neutral-700"
+					}`}
 			/>
 			<button
 				type="button"
